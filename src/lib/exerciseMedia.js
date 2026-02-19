@@ -17,10 +17,11 @@
 // ── Filename overrides ──────────────────────────────────────────────
 // When the video/image filename doesn't match the exercise id, map it here.
 // Key = exercise id, value = filename WITH extension.
+// For any exercise not listed, the app expects public/exercise-media/videos/<id>.mp4
+// (e.g. goblet-squat.mp4). Add those files or map to an existing file here.
 const VIDEO_OVERRIDES = {
   'deadlift-2h': 'Two-Hand-Deadlift.mp4',
-  // add more as needed, e.g.:
-  // 'swing-2h': 'Two-Hand-Swing.mp4',
+  'dead-stop-swing': 'Dead-Stop-Swing.mp4',
 };
 
 const IMAGE_OVERRIDES = {
