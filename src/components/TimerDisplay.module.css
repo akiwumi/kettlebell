@@ -11,6 +11,13 @@
   margin-bottom: 0.5rem;
 }
 
+.sideLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.35rem;
+}
+
 .time {
   font-size: 4rem;
   font-weight: 700;
@@ -36,7 +43,8 @@
 /* Light text on dark background (e.g. session screen) */
 .wrap.light .phase,
 .wrap.light .time,
-.wrap.light .label {
+.wrap.light .label,
+.wrap.light .sideLabel {
   color: #fff;
 }
 

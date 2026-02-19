@@ -345,6 +345,12 @@ export function speakSessionComplete(voicePreference = 'female') {
   return speakText("Amazing work! Session complete. You crushed it today!", voicePreference);
 }
 
+// ─── Public: swap sides (unilateral exercise, side 1 complete) ───
+export function speakSwapSides(voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  return speakText("And now, swap sides.", voicePreference);
+}
+
 // ─── Preload voices ────────────────────────────────────────────
 // Some browsers load voices asynchronously. Call early.
 export function preloadVoices() {

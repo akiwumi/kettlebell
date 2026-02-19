@@ -1,6 +1,7 @@
 /**
  * All 30 kettlebell exercises with form cues.
- * Each exercise has: id, name, category, cues[], defaultReps, defaultSeconds, side (optional).
+ * Each exercise has: id, name, category, cues[], defaultReps, defaultSeconds, isUnilateral, side (optional).
+ * isUnilateral: true = one arm/leg at a time (user does both sides in session); false = bilateral.
  */
 export const exercises = [
   {
@@ -16,6 +17,7 @@ export const exercises = [
     ],
     defaultReps: 10,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'swing-1h',
@@ -30,6 +32,7 @@ export const exercises = [
     ],
     defaultReps: 10,
     defaultSeconds: null,
+    isUnilateral: true,
   },
   {
     id: 'goblet-squat',
@@ -44,6 +47,7 @@ export const exercises = [
     ],
     defaultReps: 8,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'tgu',
@@ -59,6 +63,7 @@ export const exercises = [
     defaultReps: 1,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'clean',
@@ -74,6 +79,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'snatch',
@@ -89,6 +95,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'press',
@@ -104,6 +111,7 @@ export const exercises = [
     defaultReps: 6,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'push-press',
@@ -119,6 +127,7 @@ export const exercises = [
     defaultReps: 6,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'row',
@@ -134,6 +143,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'deadlift-2h',
@@ -148,6 +158,7 @@ export const exercises = [
     ],
     defaultReps: 8,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'deadlift-1h',
@@ -163,6 +174,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'front-squat',
@@ -178,6 +190,7 @@ export const exercises = [
     defaultReps: 6,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'halo',
@@ -192,6 +205,7 @@ export const exercises = [
     ],
     defaultReps: 6,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'windmill',
@@ -207,6 +221,7 @@ export const exercises = [
     defaultReps: 5,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'figure-8',
@@ -221,6 +236,7 @@ export const exercises = [
     ],
     defaultReps: 10,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'around-world',
@@ -235,6 +251,7 @@ export const exercises = [
     ],
     defaultReps: 6,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'thruster',
@@ -250,6 +267,7 @@ export const exercises = [
     defaultReps: 6,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'clean-squat-press',
@@ -265,6 +283,7 @@ export const exercises = [
     defaultReps: 5,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'single-leg-deadlift',
@@ -280,6 +299,7 @@ export const exercises = [
     defaultReps: 6,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'lunge',
@@ -295,6 +315,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'cossack',
@@ -309,6 +330,7 @@ export const exercises = [
     ],
     defaultReps: 6,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'bottoms-up-press',
@@ -324,6 +346,7 @@ export const exercises = [
     defaultReps: 5,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'bent-over-row',
@@ -339,6 +362,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'high-pull',
@@ -354,6 +378,7 @@ export const exercises = [
     defaultReps: 8,
     defaultSeconds: null,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'suitcase-carry',
@@ -369,6 +394,7 @@ export const exercises = [
     defaultReps: null,
     defaultSeconds: 30,
     side: true,
+    isUnilateral: true,
   },
   {
     id: 'rack-walk',
@@ -382,6 +408,7 @@ export const exercises = [
     ],
     defaultReps: null,
     defaultSeconds: 30,
+    isUnilateral: false,
   },
   {
     id: 'farmers-walk',
@@ -395,6 +422,7 @@ export const exercises = [
     ],
     defaultReps: null,
     defaultSeconds: 30,
+    isUnilateral: false,
   },
   {
     id: 'plank-hold',
@@ -408,6 +436,7 @@ export const exercises = [
     ],
     defaultReps: null,
     defaultSeconds: 30,
+    isUnilateral: false,
   },
   {
     id: 'dead-stop-swing',
@@ -422,6 +451,7 @@ export const exercises = [
     ],
     defaultReps: 8,
     defaultSeconds: null,
+    isUnilateral: false,
   },
   {
     id: 'alternating-swings',
@@ -436,6 +466,7 @@ export const exercises = [
     ],
     defaultReps: 10,
     defaultSeconds: null,
+    isUnilateral: false,
   },
 ];
 

@@ -34,6 +34,7 @@ import {
   speakSessionStart,
   speakSessionComplete,
   speakMidWorkEncouragement,
+  speakSwapSides,
   preloadVoices,
 } from '../lib/coachVoice';
 import TimerDisplay from './TimerDisplay';
@@ -58,11 +59,12 @@ export default function Session() {
   } = location.state || {};
 
   // ── Timer state ──────────────────────────────────────────────────
-  const [phase, setPhase] = useState('work');        // 'work' | 'countdown' | 'done'
+  const [phase, setPhase] = useState('work');        // 'work' | 'countdown' | 'done' | 'swap'
   const [workIntroLeft, setWorkIntroLeft] = useState(10); // 10s countdown at start of each exercise
   const [timeLeft, setTimeLeft] = useState(0);        // work seconds (starts after intro)
   const [exerciseIdx, setExerciseIdx] = useState(0);
   const [round, setRound] = useState(1);
+  const [currentSide, setCurrentSide] = useState(1);   // 1 or 2 for unilateral exercises
   const [paused, setPaused] = useState(false);
 
   // ── Media state ──────────────────────────────────────────────────
@@ -81,7 +83,8 @@ export default function Session() {
   const currentExercise = exercises[exerciseIdx] || {};
   const nextExerciseIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
   const nextExercise = exercises[nextExerciseIdx] || {};
-  const displayExercise = phase === 'work' ? currentExercise : nextExercise;
+  const isUnilateral = currentExercise.isUnilateral === true || currentExercise.side === true;
+  const displayExercise = phase === 'work' || phase === 'swap' ? currentExercise : nextExercise;
   const media = getExerciseMedia(displayExercise.id);
 
   // ── Reset media errors when exercise changes ─────────────────────
@@ -104,7 +107,7 @@ export default function Session() {
     };
   }, []);
 
-  // ── Reset refs when entering countdown (next exercise will get tone + encouragement) ─────
+  // ── Reset refs and currentSide when entering countdown (next exercise) ─────
   useEffect(() => {
     if (phase === 'countdown') {
       startTonePlayedRef.current = false;
@@ -112,6 +115,19 @@ export default function Session() {
       midWorkEncouragementPlayedRef.current = false;
     }
   }, [phase]);
+
+  // ── Swap phase: play "And now, swap sides", then after 1.5s start side 2 ─────
+  useEffect(() => {
+    if (phase !== 'swap') return;
+    speakSwapSides(coachVoice.current);
+    const t = setTimeout(() => {
+      setCurrentSide(2);
+      setPhase('work');
+      setTimeLeft(workSeconds);
+      setWorkIntroLeft(0);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [phase, workSeconds]);
 
   // ── Coach: longer tone at start of every exercise (when 10s intro begins) ─────
   useEffect(() => {
@@ -200,7 +216,7 @@ export default function Session() {
 
   // ── Tick ──────────────────────────────────────────────────────────
   useEffect(() => {
-    if (phase === 'done' || paused) return;
+    if (phase === 'done' || phase === 'swap' || paused) return;
 
     const id = setInterval(() => {
       if (phase === 'work' && workIntroLeft > 0) {
@@ -232,7 +248,13 @@ export default function Session() {
     justHitZero.current = false;
 
     if (phase === 'work') {
-      // After work → is there a next exercise or next round?
+      // Unilateral: side 1 complete → swap, then side 2
+      if (isUnilateral && currentSide === 1) {
+        setPhase('swap');
+        return;
+      }
+
+      // After work (or side 2 complete) → next exercise or next round?
       const lastExercise = exerciseIdx >= exercises.length - 1;
       const lastRound = round >= rounds;
 
@@ -246,7 +268,8 @@ export default function Session() {
       setTimeLeft(COUNTDOWN_SECONDS);
 
     } else if (phase === 'countdown') {
-      // Advance to next exercise (or next round)
+      // Advance to next exercise (or next round); reset side for new exercise
+      setCurrentSide(1);
       if (exerciseIdx < exercises.length - 1) {
         setExerciseIdx((i) => i + 1);
       } else {
@@ -296,12 +319,20 @@ export default function Session() {
     );
   }
 
-  // ── Background: work = current exercise; countdown = next exercise (plays through into next card)
-  const showVideo = (phase === 'work' || phase === 'countdown') && media.video && !mediaError;
-  const showImage = (phase === 'work' || phase === 'countdown') && media.image && !imageError && !showVideo;
+  // ── Background: work/swap = current exercise; countdown = next exercise
+  const showVideo = (phase === 'work' || phase === 'countdown' || phase === 'swap') && media.video && !mediaError;
+  const showImage = (phase === 'work' || phase === 'countdown' || phase === 'swap') && media.image && !imageError && !showVideo;
 
   return (
     <div className={styles.session} role="presentation">
+      {/* ── Swap overlay (unilateral: side 1 complete) ─ */}
+      {phase === 'swap' && (
+        <div className={styles.swapOverlay} role="status" aria-live="polite">
+          <span className={styles.swapArrows}>⇄</span>
+          <span className={styles.swapText}>Swap sides</span>
+        </div>
+      )}
+
       {/* ── Background media inside mobile app boundary (max 430px) ─ */}
       <div className={styles.mediaBoundary}>
         {showVideo && (
@@ -351,11 +382,12 @@ export default function Session() {
             label={
               phase === 'work' && workIntroLeft > 0
                 ? 'Get set'
-                : phase === 'work'
+                : phase === 'work' || phase === 'swap'
                   ? currentExercise.name
                   : nextExercise.name
             }
             phaseLabelOverride={phase === 'work' && workIntroLeft > 0 ? 'Get set' : undefined}
+            sideLabel={isUnilateral && (phase === 'work' || phase === 'swap') ? `Side ${currentSide} of 2` : undefined}
             variant="light"
           />
 
