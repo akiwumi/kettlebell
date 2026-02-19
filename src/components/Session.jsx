@@ -70,6 +70,7 @@ export default function Session() {
   const justHitZero = useRef(false);
   const coachVoice = useRef(getCoachVoice());
   const sessionStartAnnouncedRef = useRef(false);
+  const nextExerciseAnnouncedRef = useRef(false);
 
   const currentExercise = exercises[exerciseIdx] || {};
   const nextExerciseIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
@@ -124,15 +125,23 @@ export default function Session() {
     return () => clearTimeout(t);
   }, [phase, exerciseIdx, round]);
 
-  // ── Coach: "And now the next exercise is X" when entering countdown ─
+  // ── Coach: "Next up, X" at 6s left in work so it plays during rest (TTS has latency)
   useEffect(() => {
-    if (phase !== 'countdown' || !exercises.length || coachVoice.current === 'off') return;
-    const nextIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
+    if (phase === 'countdown') {
+      nextExerciseAnnouncedRef.current = false;
+      return;
+    }
+    if (phase !== 'work' || paused || coachVoice.current === 'off' || timeLeft !== 6) return;
+    if (nextExerciseAnnouncedRef.current) return;
+    const lastEx = exerciseIdx >= exercises.length - 1;
+    const lastRd = round >= rounds;
+    if (lastEx && lastRd) return; // session ending, no next exercise
+    const nextIdx = lastEx ? 0 : exerciseIdx + 1;
     const nextEx = exercises[nextIdx];
     if (!nextEx?.name) return;
-    const t = setTimeout(() => speakNextExerciseIs(nextEx.name, coachVoice.current), 120);
-    return () => clearTimeout(t);
-  }, [phase, exerciseIdx, exercises]);
+    nextExerciseAnnouncedRef.current = true;
+    speakNextExerciseIs(nextEx.name, coachVoice.current);
+  }, [phase, paused, timeLeft, exerciseIdx, round, rounds, exercises]);
 
   // ── Coach: count down last 10 seconds of work (10, 9, … 1) ───────
   useEffect(() => {

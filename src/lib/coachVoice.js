@@ -255,13 +255,14 @@ export function speakStart(voicePreference = 'female') {
 }
 
 // ─── Public: countdown number (last 10 seconds of work); encouraging on 3, 2, 1
+// Uses synthesis only so countdown stays in sync with timer (TTS latency would desync).
 export function speakCountdownNumber(n, voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
   if (n < 1 || n > 10) return Promise.resolve();
   const words = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
   const base = words[n].charAt(0).toUpperCase() + words[n].slice(1);
   const text = n === 3 ? 'Three! Keep it up!' : n === 2 ? 'Two! Almost there!' : n === 1 ? 'One! Last second!' : base;
-  return speakText(text, voicePreference);
+  return speakWithSynthesis(text, voicePreference);
 }
 
 // ─── Public: next exercise is (at end of exercise, before "Next in" countdown)
