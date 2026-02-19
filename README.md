@@ -30,7 +30,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Pro subscription model (UPDATED_STRUCTURE)** – Supabase Auth (register, sign-in, email verification), AuthContext, auth components (RegisterModal, SignInModal, EmailVerification, ForgotPassword, AuthCallback, AuthGate). Stripe payment: ProBanner, PaywallOverlay, ProGate, PaymentSuccess/Cancel, ManageSubscription; Edge Functions (create-checkout-session, stripe-webhook, create-portal-session). New routes: /auth/callback, /payment/success, /payment/cancel, /goals. Home shows Pro banner and lock badges for free users; RoutinePage gates "Start" with registration and My Routines/Build your own with ProGate; Dashboard, Progress, DataHome, AIAssistant, Goals wrapped in ProGate. Profile: ManageSubscription, Sign out. Schema: supabase-schema.sql (profiles, subscriptions, workout_sessions, user_routines, body_metrics, personal_records, schedules, user_goals). See UPDATED_STRUCTURE.md. |
+| Latest | **Get-ready page & encouraging coach** – After "Start session", a 10s **Get-ready** page shows the first exercise video and countdown; coach says "Get ready. You've got this!" on first tap (unlocks audio). Then flows into Session. **Session coach:** says "Go! Give it everything you've got!" at start of each exercise; counts down last 10s with encouraging phrases ("Three! Keep it up!", "Two! Almost there!", "One! Last second!"); between exercises says "Nice work! Next up, [name]. You're doing great."; session end: "Amazing work! Session complete. You crushed it today!" Coach voice **defaults to Female** (on) unless set to Off in Profile. See `GetReady.jsx`, `coachVoice.js`, `profileStorage.js`. |
+| — | **Pro subscription model (UPDATED_STRUCTURE)** – Supabase Auth (register, sign-in, email verification), AuthContext, auth components (RegisterModal, SignInModal, EmailVerification, ForgotPassword, AuthCallback, AuthGate). Stripe payment: ProBanner, PaywallOverlay, ProGate, PaymentSuccess/Cancel, ManageSubscription; Edge Functions (create-checkout-session, stripe-webhook, create-portal-session). New routes: /auth/callback, /payment/success, /payment/cancel, /goals. Home shows Pro banner and lock badges for free users; RoutinePage gates "Start" with registration and My Routines/Build your own with ProGate; Dashboard, Progress, DataHome, AIAssistant, Goals wrapped in ProGate. Profile: ManageSubscription, Sign out. Schema: supabase-schema.sql (profiles, subscriptions, workout_sessions, user_routines, body_metrics, personal_records, schedules, user_goals). See UPDATED_STRUCTURE.md. |
 | — | **Session timer: countdown last 10 seconds** – During "Next in" phase, the numeric countdown (10, 9, … 1) is shown only for the last 10 seconds; first 10 seconds show "—". Last-10 number is emphasized (larger, accent color). See `TimerDisplay.jsx`, `TimerDisplay.module.css`. |
 | — | **Header horizontal logo, Home fits without scroll** – Header uses horizontal Kettlebell Mastery logo (`kettlebell_mastery_logo_horizontal.png`) at 44px height; icon replaced in AppLayout only. Home card content fits without scrolling: 2×2 grid for dashboard cards, tighter hero/card padding and typography, `overflow: hidden` on home card. See `constants.js` (KETTLEBELL_HEADER_LOGO_URL), `AppLayout.jsx`, `Home.jsx`, `Home.module.css`. |
 | — | **Transparent header, no page scroll** – Top header is transparent. Main content fits between header and bottom nav (no page scroll): wrapper and main use fixed height; main card (Layout) fills the gap and scrolls internally (`fillViewport`). Library (exercise cards) uses `fillViewport={false}` so it keeps normal scroll. See `AppLayout.module.css`, `Layout.jsx` (fillViewport), `Library.jsx`. |
@@ -54,10 +55,9 @@ When you add features, fix behaviour, or change structure, add a row here and up
 
 ## Quick start (code instructions)
 
-From the **kettlebell-app** folder:
+From the **project root**:
 
 ```bash
-cd kettlebell-app
 npm install
 npm run dev      # Dev server (e.g. http://localhost:5173)
 npm run build    # Production build → dist/
@@ -92,8 +92,9 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | `/goals` | **Goals** | Goal setting and tracking (Pro) |
 | `/ai-assistant` | **AIAssistant** | AI insights (ProGate); consistency, volume, goal, streak, variety, next action |
 | `/routine` | **RoutinePage** | Tabs: Pre-curated (auth to start), My routines / Build your own (ProGate); select or create routine → timer setup |
-| `/timer-setup` | **TimerSetup** | Scroll pickers for work (sec) and rounds; list exercises from routine or today’s rotation; Start session |
-| `/session` | **Session** | Live workout: work → 20s “Next in” countdown → next exercise; per-exercise media; coach voice and countdown beep (Profile); timer at bottom, frosted UI |
+| `/timer-setup` | **TimerSetup** | Scroll pickers for work (sec) and rounds; list exercises from routine or today’s rotation; Start session → Get-ready |
+| `/get-ready` | **GetReady** | 10s countdown with first exercise video; coach "Get ready. You've got this!" on tap; then Session |
+| `/session` | **Session** | Live workout: work → 10s “Next in” countdown → next exercise; next exercise video through countdown; encouraging coach; timer at bottom, frosted UI |
 | `/dashboard` | **Dashboard** | Summary: streak, workouts, goal %, adherence, achievements (ProGate) |
 | `/progress` | **Progress** | Charts: weight, measurements, volume, heat map, strength, goals (ProGate) |
 | `/schedule` | **Schedule** | Workout/rest days, deload, reminders |
@@ -123,8 +124,9 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 
 | Component | Purpose |
 |-----------|---------|
-| **Session** | Orchestrates phases (work, countdown), timer, exercise list, per-exercise media; coach voice and countdown beep; timer frame at bottom above nav, frosted container |
-| **TimerDisplay** | Shows phase (Work / Next in), countdown number, exercise name; during "Next in", numeric countdown only for last 10 s (10…1), first 10 s show "—" |
+| **GetReady** | Pre-session: 10s countdown with first exercise video; coach "Get ready. You've got this!" on first tap; then Session |
+| **Session** | Phases (work, 10s countdown); next exercise video during countdown; encouraging coach (Start, 3-2-1, next exercise, complete); timer at bottom, frosted container |
+| **TimerDisplay** | Shows phase (Work / Next in), countdown number, exercise name; "Next in" countdown 10…1 |
 | **SessionProgress** | “Round X / Y · Exercise A / B” |
 | **SessionComplete** | End-of-session summary and link home |
 | **CueList** | Up to 3 form cues for current exercise |
@@ -166,8 +168,8 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | | `routineDatabase.js` | IndexedDB “KettlebellUserRoutines”, store “routines”; getRoutines, saveRoutine, deleteRoutine; migration from localStorage |
 | | `trackingStorage.js` | Workouts, body metrics, PRs (localStorage): getWorkouts, saveWorkout, getBodyMetrics, saveBodyMetric, getPRs, savePR |
 | | `scheduleStorage.js` | Schedule and reminders (localStorage): getSchedule, saveSchedule |
-| | `profileStorage.js` | loadProfile, getDisplayName, getPhotoUrl, getCoachVoice (off/female/male) |
-| | `coachVoice.js` | speak, speakNextExercise, speakSessionStart, speakSessionComplete, playCountdownBeep, unlockAudio, preloadVoices; Web Speech API + Web Audio API; ignores `interrupted` in onerror |
+| | `profileStorage.js` | loadProfile, getDisplayName, getPhotoUrl, getCoachVoice (off/female/male; default female so coach is on) |
+| | `coachVoice.js` | speak, speakGetReady, speakStart, speakCountdownNumber, speakNextExerciseIs, speakSessionStart, speakSessionComplete, playCountdownBeep, unlockAudio, preloadVoices; encouraging phrases; Web Speech API + Web Audio API |
 | | `exerciseMedia.js` | getExerciseMedia(id) → video/image URLs under public/exercise-media/; optional filename overrides (e.g. deadlift-2h → Two-Hand-Deadlift.mp4); URLs built absolute from current origin |
 | | `shareData.js` | buildShareText, shareOrCopy (Web Share API or clipboard) |
 | | `registrationData.js` | getAllUserData() – export profile, workoutHistory, bodyMetrics, prs, schedule, userRoutines to registration table shape |
@@ -229,9 +231,10 @@ kettlebell-app/
     │   ├── DataLayout.jsx, DataLayout.module.css
     │   ├── ExerciseCard.jsx, ExerciseCard.module.css
     │   ├── ExerciseListItem.jsx, ExerciseListItem.module.css
-    │   ├── FilterBar.jsx, FilterBar.module.css
-    │   ├── Home.jsx, Home.module.css
-    │   ├── Landing.jsx, Landing.module.css
+│   ├── FilterBar.jsx, FilterBar.module.css
+│   ├── GetReady.jsx, GetReady.module.css
+│   ├── Home.jsx, Home.module.css
+│   ├── Landing.jsx, Landing.module.css
     │   ├── Layout.jsx, Layout.module.css
     │   ├── Library.jsx, Library.module.css
     │   ├── MenuDrawer.jsx, MenuDrawer.module.css
@@ -307,14 +310,18 @@ kettlebell-app/
 
 - **Exercises** – From the chosen routine, or today’s rotation if opened without a routine.
 - **Work & rounds** – Two scroll pickers side by side, each 80px wide; wheels show 3 numbers (compact height). Labels “Work” and “Rnds”; numbers only (no “sec”). Work 5–120 in steps of 5, Rounds 1–10. Scroll to set; text fits within wheel width.
-- **Start session** – Passes exercises, work seconds, and rounds to the session screen.
+- **Start session** – Navigates to **Get-ready** with exercises, work seconds, and rounds.
+
+### Get-ready (pre-session)
+
+- **Flow** – 10-second countdown with the **first exercise video** (or image) as background. Tap once to unlock audio and hear the coach: "Get ready. You've got this!" When the countdown reaches 0, the app navigates to Session so the same video continues into the first exercise.
 
 ### Session (workout)
 
-- **Phases** – **Work** → **20s “Next in” countdown** → next exercise (or next round / finish). Timer runs continuously; no need to tap Start again between phases or exercises.
-- **Layout** – Timer block and controls sit at the **bottom** of the screen, above the bottom nav, inside a frosted glass container. Background video/image only during the work phase (dark screen during countdown). Media stays within the mobile app boundary (max 430px).
-- **Coach voice** – If set in Profile (Female or Male), a voice announces the next exercise at the start of each “Next in” countdown (“Next up: [name]. Get ready.”). A short **beep** plays each second for the **last 10 seconds** of the countdown. First tap in the session unlocks audio on iOS/Safari.
-- **Per-exercise background** – Optional image or video per exercise (see [Exercise media](#exercise-media-images--videos)) behind the UI during work only; dark overlay for readability.
+- **Phases** – **Work** → **10s “Next in” countdown** → next exercise (or next round / finish). Timer runs continuously. The **next exercise's video** plays during the countdown and continues into the next work phase.
+- **Layout** – Timer block and controls sit at the **bottom** of the screen, above the bottom nav, inside a frosted glass container. Background video/image during both work and "Next in" (next exercise's media). Media stays within the mobile app boundary (max 430px).
+- **Coach voice** – Default **on** (Female) in Profile. Encouraging phrases: at start of each exercise “Go! Give it everything you've got!”; last 10s of work: “Three! Keep it up!”, “Two! Almost there!”, “One! Last second!”; between exercises “Nice work! Next up, [name]. You're doing great.”; session end “Amazing work! Session complete. You crushed it today!” Beep in last 10s of “Next in”. First tap (Get-ready or Session) unlocks audio on iOS/Safari.
+- **Per-exercise background** – Optional image or video per exercise (see [Exercise media](#exercise-media-images--videos)); next exercise's media shown during countdown. Dark overlay for readability.
 - **Progress** – “Round X / Y · Exercise A / B”; current exercise name and up to 3 form cues during work.
 - **Controls** – Pause/Start, Quit. Session auto-starts on load.
 
@@ -359,7 +366,7 @@ kettlebell-app/
 ### Profile
 
 - **Basic info** – Name, age, gender, photo, weight, height, target weight, body measurements, fitness level, experience, injuries.
-- **Coach voice** – Off / Female / Male. When set, the session uses that voice to announce the next exercise during the “Next in” countdown and plays a countdown beep in the last 10 seconds.
+- **Coach voice** – Off / Female / Male. Default **Female** (coach on). When on, encouraging phrases during Get-ready, Session (Start, countdown 3-2-1, next exercise, complete); beep in last 10s of “Next in”.
 - **Edit photo** – Button to upload a profile picture; image stored as base64 in profile (compressed if needed) so it persists. With a backend, photos can be stored under `public/registration/profile-photos/`.
 - **Equipment** – Kettlebell weights, other equipment, space.
 - **Goals** – Primary/secondary goals, timeline, duration, days per week, preferred times, rest days.
@@ -410,8 +417,9 @@ Use these exact IDs as filenames (no extension in the ID):
 |------|-------------|
 | `/` | Home dashboard (welcome, photo, cards, “Choose routine”) |
 | `/routine` | Choose routine: pre-curated, my routines, or build your own |
-| `/timer-setup` | Scroll pickers for work (sec) and rounds; exercises from routine or today’s rotation |
-| `/session` | Live workout: work → 20s countdown → next exercise; per-exercise video/image; optional coach voice and countdown beep; timer at bottom |
+| `/timer-setup` | Scroll pickers for work (sec) and rounds; exercises from routine or today’s rotation; Start session → Get-ready |
+| `/get-ready` | 10s countdown with first exercise video; coach "Get ready"; then Session |
+| `/session` | Live workout: work → 10s countdown → next exercise; next exercise video through countdown; encouraging coach; timer at bottom |
 | `/dashboard` | Summary dashboard (streak, goal %, achievements, etc.) |
 | `/progress` | Charts: weight, measurements, volume, heat map, strength, goal |
 | `/schedule` | Workout days, rest days, deload, reminders |
@@ -496,7 +504,7 @@ Use these exact IDs as filenames (no extension in the ID):
 | Build | `npm run build` | Production build → `dist/` |
 | Preview | `npm run preview` | Serve `dist/` locally (e.g. http://localhost:4173) |
 
-See [Quick start](#quick-start-code-instructions) above. Project root has no `dev` script; always run from **kettlebell-app**.
+See [Quick start](#quick-start-code-instructions) above. Run all commands from the **project root**.
 
 ---
 
