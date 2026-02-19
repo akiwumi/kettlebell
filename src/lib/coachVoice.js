@@ -1,8 +1,17 @@
 // src/lib/coachVoice.js
-// Coach voice announcements (Web Speech API) and countdown beep (Web Audio API)
+// Coach voice: prefers OpenAI TTS (real voice) via /api/tts/stream when available;
+// falls back to Web Speech API (synthesized). Countdown beep uses Web Audio API.
 
 let audioCtx = null;
 let audioUnlocked = false;
+
+// When TTS server is running (Vite proxies /api to it), we use real OpenAI voice.
+const TTS_API_BASE = typeof import.meta !== 'undefined' && import.meta.env?.VITE_TTS_API_URL != null
+  ? import.meta.env.VITE_TTS_API_URL
+  : '';
+
+let currentTTSAbort = null;
+let currentTTSAudio = null;
 
 // ─── Audio Context ─────────────────────────────────────────────
 function getAudioContext() {
@@ -66,57 +75,74 @@ export function playCountdownBeep(frequency = 880, durationMs = 120) {
   }
 }
 
-// ─── Speech (Web Speech API) ───────────────────────────────────
-// Returns a Promise that resolves when speech ends (or rejects on error).
-function speakText(text, voicePreference = 'female') {
-  return new Promise((resolve, reject) => {
-    if (!('speechSynthesis' in window)) {
-      console.warn('[CoachVoice] SpeechSynthesis not supported');
-      resolve();
-      return;
-    }
+// ─── Stop any current TTS playback ─────────────────────────────
+function stopTTS() {
+  if (currentTTSAbort) {
+    currentTTSAbort.abort();
+    currentTTSAbort = null;
+  }
+  if (currentTTSAudio) {
+    try {
+      currentTTSAudio.pause();
+      currentTTSAudio.src = '';
+    } catch (_) {}
+    currentTTSAudio = null;
+  }
+}
 
-    // Cancel any queued speech
-    window.speechSynthesis.cancel();
+// ─── Real voice via TTS server (OpenAI) ─────────────────────────
+// Returns a Promise that resolves when playback ends, or rejects on error.
+function playViaTTS(text, voicePreference = 'female') {
+  const url = `${TTS_API_BASE}/api/tts/stream`.replace(/\/+/g, '/');
+  const body = JSON.stringify({ text, voice: voicePreference });
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+  stopTTS();
+  window.speechSynthesis?.cancel();
 
-    // Try to pick a voice matching the preference
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      const preferFemale = voicePreference === 'female';
-      // Heuristic: female voice names often contain these keywords
-      const femaleHints = ['female', 'woman', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'susan'];
-      const maleHints = ['male', 'man', 'daniel', 'james', 'alex', 'fred', 'thomas', 'gordon', 'lee'];
+  const abort = new AbortController();
+  currentTTSAbort = abort;
 
-      const hints = preferFemale ? femaleHints : maleHints;
-      const match = voices.find(v => {
-        const name = v.name.toLowerCase();
-        return hints.some(h => name.includes(h)) && v.lang.startsWith('en');
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+    signal: abort.signal,
+  })
+    .then((res) => {
+      currentTTSAbort = null;
+      if (!res.ok) throw new Error(`TTS ${res.status}`);
+      return res.blob();
+    })
+    .then((blob) => {
+      const objectUrl = URL.createObjectURL(blob);
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(objectUrl);
+        currentTTSAudio = audio;
+        audio.onended = () => {
+          URL.revokeObjectURL(objectUrl);
+          currentTTSAudio = null;
+          resolve();
+        };
+        audio.onerror = (e) => {
+          URL.revokeObjectURL(objectUrl);
+          currentTTSAudio = null;
+          reject(e);
+        };
+        audio.play().catch(reject);
       });
+    })
+    .catch((err) => {
+      currentTTSAbort = null;
+      if (err?.name === 'AbortError') return Promise.reject(err);
+      throw err;
+    });
+}
 
-      if (match) {
-        utterance.voice = match;
-      } else {
-        // Fallback: pick any English voice
-        const englishVoice = voices.find(v => v.lang.startsWith('en'));
-        if (englishVoice) utterance.voice = englishVoice;
-      }
-    }
-
-    utterance.onend = resolve;
-    utterance.onerror = (e) => {
-      // 'interrupted' is expected when we call cancel() or start a new utterance
-      if (e.error !== 'interrupted') {
-        console.warn('[CoachVoice] Speech error:', e.error, e);
-      }
-      resolve(); // resolve anyway so session doesn't hang
-    };
-
-    window.speechSynthesis.speak(utterance);
+// ─── Speech: real voice only via TTS server (no browser synthesis) ─
+// Returns a Promise that resolves when playback ends. On TTS failure, resolves without speaking.
+function speakText(text, voicePreference = 'female') {
+  return playViaTTS(text, voicePreference).catch(() => {
+    // TTS unavailable or failed: stay silent (no synthesized fallback)
   });
 }
 

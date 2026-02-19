@@ -22,7 +22,7 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 | **AI_STATUS.txt** | AI integration status checklist. |
 | **EXERCISE.md** | Exercise list and IDs for media naming and reference. |
 | **OPENAI_TTS_README.md** | Spec for OpenAI TTS integration (streaming + file generation). |
-| **tts-server/** | Optional Node.js TTS server: `example-generate.mjs` (generate MP3 via OpenAI). Run from `tts-server`: set `OPENAI_API_KEY` in `.env`, then `node example-generate.mjs`. |
+| **tts-server/** | Optional Node.js TTS server for **real** coach voice (OpenAI) only. Run `npm run dev` in `tts-server/` with `OPENAI_API_KEY` in `.env`; app proxies `/api` to it. No browser synthesis fallback—silent if TTS server is not running. |
 
 ---
 
@@ -32,7 +32,9 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **OpenAI TTS server (optional)** – `tts-server/` with `example-generate.mjs`: generate speech via OpenAI API and save to `output.mp3`. Requires `OPENAI_API_KEY` in `tts-server/.env`. See OPENAI_TTS_README.md. |
+| Latest | **Coach voice: real only (no synthesis)** – Coach uses only OpenAI TTS via `POST /api/tts/stream`; browser synthesis fallback removed so only one voice plays. If TTS server is down, coach is silent. Run `tts-server`: `cd tts-server && npm run dev` with `OPENAI_API_KEY` in `.env`. See `coachVoice.js`, `tts-server/src`, `vite.config.js` proxy. |
+| — | **Real coach voice (OpenAI TTS)** – Coach uses **real** OpenAI TTS when the TTS server is running; otherwise falls back to browser synthesis. Run `tts-server`: `cd tts-server && npm run dev` with `OPENAI_API_KEY` in `.env`. App proxies `/api` to port 3000; `coachVoice.js` calls `POST /api/tts/stream` and plays MP3. See `tts-server/src`, `vite.config.js` proxy, OPENAI_TTS_README.md. |
+| — | **OpenAI TTS server (optional)** – `tts-server/` with `example-generate.mjs`: generate speech via OpenAI API and save to `output.mp3`. Requires `OPENAI_API_KEY` in `tts-server/.env`. See OPENAI_TTS_README.md. |
 | — | **Get-ready page & encouraging coach** – After "Start session", a 10s **Get-ready** page shows the first exercise video and countdown; coach says "Get ready. You've got this!" on first tap (unlocks audio). Then flows into Session. **Session coach:** says "Go! Give it everything you've got!" at start of each exercise; counts down last 10s with encouraging phrases ("Three! Keep it up!", "Two! Almost there!", "One! Last second!"); between exercises says "Nice work! Next up, [name]. You're doing great."; session end: "Amazing work! Session complete. You crushed it today!" Coach voice **defaults to Female** (on) unless set to Off in Profile. See `GetReady.jsx`, `coachVoice.js`, `profileStorage.js`. |
 | — | **Pro subscription model (UPDATED_STRUCTURE)** – Supabase Auth (register, sign-in, email verification), AuthContext, auth components (RegisterModal, SignInModal, EmailVerification, ForgotPassword, AuthCallback, AuthGate). Stripe payment: ProBanner, PaywallOverlay, ProGate, PaymentSuccess/Cancel, ManageSubscription; Edge Functions (create-checkout-session, stripe-webhook, create-portal-session). New routes: /auth/callback, /payment/success, /payment/cancel, /goals. Home shows Pro banner and lock badges for free users; RoutinePage gates "Start" with registration and My Routines/Build your own with ProGate; Dashboard, Progress, DataHome, AIAssistant, Goals wrapped in ProGate. Profile: ManageSubscription, Sign out. Schema: supabase-schema.sql (profiles, subscriptions, workout_sessions, user_routines, body_metrics, personal_records, schedules, user_goals). See UPDATED_STRUCTURE.md. |
 | — | **Session timer: countdown last 10 seconds** – During "Next in" phase, the numeric countdown (10, 9, … 1) is shown only for the last 10 seconds; first 10 seconds show "—". Last-10 number is emphasized (larger, accent color). See `TimerDisplay.jsx`, `TimerDisplay.module.css`. |
@@ -68,7 +70,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 ```
 
 - **Optional:** Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for session history (see [Environment variables](#environment-variables)). Run `supabase-schema.sql` in Supabase SQL Editor if using Supabase.
-- **Optional – OpenAI TTS:** From `tts-server/`, add `OPENAI_API_KEY=sk-...` to `.env` (no space after `=`), then `npm install openai dotenv` and `node example-generate.mjs` to generate `output.mp3`. See [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
+- **Optional – real coach voice (OpenAI TTS):** Run the TTS server so the app uses a real voice instead of browser synthesis. In a second terminal: `cd tts-server && npm run dev`. Add `OPENAI_API_KEY=sk-...` to `tts-server/.env` (no space after `=`). Vite proxies `/api` to the TTS server; when it’s running, coach phrases are played via OpenAI. See [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
 - **Full steps and troubleshooting:** [SETUP.md](SETUP.md).
 
 ---
