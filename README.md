@@ -21,6 +21,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 | **AI_QUICKSTART.md** | AI Assistant user guide. |
 | **AI_STATUS.txt** | AI integration status checklist. |
 | **EXERCISE.md** | Exercise list and IDs for media naming and reference. |
+| **OPENAI_TTS_README.md** | Spec for OpenAI TTS integration (streaming + file generation). |
+| **tts-server/** | Optional Node.js TTS server: `example-generate.mjs` (generate MP3 via OpenAI). Run from `tts-server`: set `OPENAI_API_KEY` in `.env`, then `node example-generate.mjs`. |
 
 ---
 
@@ -30,7 +32,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Get-ready page & encouraging coach** – After "Start session", a 10s **Get-ready** page shows the first exercise video and countdown; coach says "Get ready. You've got this!" on first tap (unlocks audio). Then flows into Session. **Session coach:** says "Go! Give it everything you've got!" at start of each exercise; counts down last 10s with encouraging phrases ("Three! Keep it up!", "Two! Almost there!", "One! Last second!"); between exercises says "Nice work! Next up, [name]. You're doing great."; session end: "Amazing work! Session complete. You crushed it today!" Coach voice **defaults to Female** (on) unless set to Off in Profile. See `GetReady.jsx`, `coachVoice.js`, `profileStorage.js`. |
+| Latest | **OpenAI TTS server (optional)** – `tts-server/` with `example-generate.mjs`: generate speech via OpenAI API and save to `output.mp3`. Requires `OPENAI_API_KEY` in `tts-server/.env`. See OPENAI_TTS_README.md. |
+| — | **Get-ready page & encouraging coach** – After "Start session", a 10s **Get-ready** page shows the first exercise video and countdown; coach says "Get ready. You've got this!" on first tap (unlocks audio). Then flows into Session. **Session coach:** says "Go! Give it everything you've got!" at start of each exercise; counts down last 10s with encouraging phrases ("Three! Keep it up!", "Two! Almost there!", "One! Last second!"); between exercises says "Nice work! Next up, [name]. You're doing great."; session end: "Amazing work! Session complete. You crushed it today!" Coach voice **defaults to Female** (on) unless set to Off in Profile. See `GetReady.jsx`, `coachVoice.js`, `profileStorage.js`. |
 | — | **Pro subscription model (UPDATED_STRUCTURE)** – Supabase Auth (register, sign-in, email verification), AuthContext, auth components (RegisterModal, SignInModal, EmailVerification, ForgotPassword, AuthCallback, AuthGate). Stripe payment: ProBanner, PaywallOverlay, ProGate, PaymentSuccess/Cancel, ManageSubscription; Edge Functions (create-checkout-session, stripe-webhook, create-portal-session). New routes: /auth/callback, /payment/success, /payment/cancel, /goals. Home shows Pro banner and lock badges for free users; RoutinePage gates "Start" with registration and My Routines/Build your own with ProGate; Dashboard, Progress, DataHome, AIAssistant, Goals wrapped in ProGate. Profile: ManageSubscription, Sign out. Schema: supabase-schema.sql (profiles, subscriptions, workout_sessions, user_routines, body_metrics, personal_records, schedules, user_goals). See UPDATED_STRUCTURE.md. |
 | — | **Session timer: countdown last 10 seconds** – During "Next in" phase, the numeric countdown (10, 9, … 1) is shown only for the last 10 seconds; first 10 seconds show "—". Last-10 number is emphasized (larger, accent color). See `TimerDisplay.jsx`, `TimerDisplay.module.css`. |
 | — | **Header horizontal logo, Home fits without scroll** – Header uses horizontal Kettlebell Mastery logo (`kettlebell_mastery_logo_horizontal.png`) at 44px height; icon replaced in AppLayout only. Home card content fits without scrolling: 2×2 grid for dashboard cards, tighter hero/card padding and typography, `overflow: hidden` on home card. See `constants.js` (KETTLEBELL_HEADER_LOGO_URL), `AppLayout.jsx`, `Home.jsx`, `Home.module.css`. |
@@ -65,6 +68,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 ```
 
 - **Optional:** Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for session history (see [Environment variables](#environment-variables)). Run `supabase-schema.sql` in Supabase SQL Editor if using Supabase.
+- **Optional – OpenAI TTS:** From `tts-server/`, add `OPENAI_API_KEY=sk-...` to `.env` (no space after `=`), then `npm install openai dotenv` and `node example-generate.mjs` to generate `output.mp3`. See [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
 - **Full steps and troubleshooting:** [SETUP.md](SETUP.md).
 
 ---
