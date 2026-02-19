@@ -110,6 +110,26 @@ export function playCountdownBeep(frequency = 880, durationMs = 120) {
   }
 }
 
+// ─── Longer tone at start of every exercise ─────────────────────
+export function playStartOfExerciseTone(durationMs = 500, frequency = 440) {
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + durationMs / 1000);
+  } catch (e) {
+    console.warn('[CoachVoice] Start tone failed:', e);
+  }
+}
+
 // ─── Stop any current TTS playback ─────────────────────────────
 function stopTTS() {
   if (currentTTSAbort) {
@@ -248,10 +268,37 @@ export function speakGetReady(voicePreference = 'female') {
   return speakText("Get ready. You've got this!", voicePreference);
 }
 
-// ─── Public: start (at beginning of each exercise work phase) ───
+const START_PHRASES = [
+  "Go! Give it everything you've got!",
+  "Let's go! You've got this!",
+  "Go! Crush it!",
+  "Here we go! Give it your all!",
+  "Go! Strong and steady!",
+];
+const MID_WORK_PHRASES = [
+  "Keep it up!",
+  "Doing great!",
+  "Stay strong!",
+  "You're crushing it!",
+  "Nice and controlled!",
+  "Keep going!",
+  "Strong work!",
+  "Halfway there!",
+];
+const SESSION_START_PHRASES = [
+  "Let's go! You're going to crush this. Starting with {exercise}.",
+  "Here we go! Starting with {exercise}. You've got this!",
+  "Time to work! First up, {exercise}. Let's go!",
+];
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ─── Public: start (at beginning of each exercise work phase); random ───
 export function speakStart(voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
-  return speakText("Go! Give it everything you've got!", voicePreference);
+  return speakText(pick(START_PHRASES), voicePreference);
 }
 
 // ─── Public: countdown number (last 10 seconds of work); encouraging on 3, 2, 1
@@ -279,11 +326,17 @@ export function speakNextExercise(exerciseName, voicePreference = 'female') {
   return speakText(text, voicePreference);
 }
 
-// ─── Public: announce session start ────────────────────────────
+// ─── Public: announce session start (first exercise); random ─────
 export function speakSessionStart(exerciseName, voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
-  const text = `Let's go! You're going to crush this. Starting with ${exerciseName}.`;
+  const text = pick(SESSION_START_PHRASES).replace('{exercise}', exerciseName);
   return speakText(text, voicePreference);
+}
+
+// ─── Public: mid-work encouragement; random, synthesis for sync ───
+export function speakMidWorkEncouragement(voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  return speakWithSynthesis(pick(MID_WORK_PHRASES), voicePreference);
 }
 
 // ─── Public: announce session complete ─────────────────────────

@@ -27,11 +27,13 @@ import { getExerciseMedia } from '../lib/exerciseMedia';
 import { getCoachVoice } from '../lib/profileStorage';
 import {
   playCountdownBeep,
+  playStartOfExerciseTone,
   speakStart,
   speakCountdownNumber,
   speakNextExerciseIs,
   speakSessionStart,
   speakSessionComplete,
+  speakMidWorkEncouragement,
   preloadVoices,
 } from '../lib/coachVoice';
 import TimerDisplay from './TimerDisplay';
@@ -57,7 +59,8 @@ export default function Session() {
 
   // ── Timer state ──────────────────────────────────────────────────
   const [phase, setPhase] = useState('work');        // 'work' | 'countdown' | 'done'
-  const [timeLeft, setTimeLeft] = useState(workSeconds);
+  const [workIntroLeft, setWorkIntroLeft] = useState(10); // 10s countdown at start of each exercise
+  const [timeLeft, setTimeLeft] = useState(0);        // work seconds (starts after intro)
   const [exerciseIdx, setExerciseIdx] = useState(0);
   const [round, setRound] = useState(1);
   const [paused, setPaused] = useState(false);
@@ -71,6 +74,9 @@ export default function Session() {
   const coachVoice = useRef(getCoachVoice());
   const sessionStartAnnouncedRef = useRef(false);
   const nextExerciseAnnouncedRef = useRef(false);
+  const startTonePlayedRef = useRef(false);
+  const startPhrasePlayedRef = useRef(false);
+  const midWorkEncouragementPlayedRef = useRef(false);
 
   const currentExercise = exercises[exerciseIdx] || {};
   const nextExerciseIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
@@ -98,7 +104,23 @@ export default function Session() {
     };
   }, []);
 
-  // ── Coach: session start (audio already unlocked by "Start session" tap) ─────
+  // ── Reset refs when entering countdown (next exercise will get tone + encouragement) ─────
+  useEffect(() => {
+    if (phase === 'countdown') {
+      startTonePlayedRef.current = false;
+      startPhrasePlayedRef.current = false;
+      midWorkEncouragementPlayedRef.current = false;
+    }
+  }, [phase]);
+
+  // ── Coach: longer tone at start of every exercise (when 10s intro begins) ─────
+  useEffect(() => {
+    if (phase !== 'work' || workIntroLeft !== 10 || coachVoice.current === 'off' || startTonePlayedRef.current) return;
+    startTonePlayedRef.current = true;
+    playStartOfExerciseTone(500, 440);
+  }, [phase, workIntroLeft]);
+
+  // ── Coach: session start – speak first exercise name (after tone) ─────
   useEffect(() => {
     if (
       phase !== 'work' ||
@@ -108,7 +130,7 @@ export default function Session() {
     )
       return;
     sessionStartAnnouncedRef.current = true;
-    const t = setTimeout(() => speakSessionStart(exercises[0].name, coachVoice.current), 100);
+    const t = setTimeout(() => speakSessionStart(exercises[0].name, coachVoice.current), 300);
     return () => clearTimeout(t);
   }, [phase, exercises]);
 
@@ -118,12 +140,28 @@ export default function Session() {
     speakSessionComplete(coachVoice.current);
   }, [phase]);
 
-  // ── Coach: "Start" at beginning of each work phase ───────────────
+  // ── Coach: 10s intro countdown at start of each exercise (10, 9, … 1) in sync ─────
   useEffect(() => {
-    if (phase !== 'work' || coachVoice.current === 'off') return;
-    const t = setTimeout(() => speakStart(coachVoice.current), 80);
+    if (phase !== 'work' || paused || coachVoice.current === 'off' || workIntroLeft < 1 || workIntroLeft > 10) return;
+    speakCountdownNumber(workIntroLeft, coachVoice.current);
+  }, [phase, paused, workIntroLeft]);
+
+  // ── Coach: "Go!" / start phrase once after intro ends (when work timer actually starts) ─────
+  useEffect(() => {
+    if (phase !== 'work' || coachVoice.current === 'off' || workIntroLeft > 0 || startPhrasePlayedRef.current) return;
+    startPhrasePlayedRef.current = true;
+    const t = setTimeout(() => speakStart(coachVoice.current), 100);
     return () => clearTimeout(t);
-  }, [phase, exerciseIdx, round]);
+  }, [phase, workIntroLeft]);
+
+  // ── Coach: mid-work random encouragement (once per exercise, halfway through) ─────
+  useEffect(() => {
+    if (phase !== 'work' || paused || coachVoice.current === 'off' || workIntroLeft > 0) return;
+    const half = Math.ceil(workSeconds / 2);
+    if (timeLeft !== half || midWorkEncouragementPlayedRef.current) return;
+    midWorkEncouragementPlayedRef.current = true;
+    speakMidWorkEncouragement(coachVoice.current);
+  }, [phase, paused, workIntroLeft, timeLeft, workSeconds]);
 
   // ── Coach: "Next up, X" at 6s left in work so it plays during rest (TTS has latency)
   useEffect(() => {
@@ -131,7 +169,7 @@ export default function Session() {
       nextExerciseAnnouncedRef.current = false;
       return;
     }
-    if (phase !== 'work' || paused || coachVoice.current === 'off' || timeLeft !== 6) return;
+    if (phase !== 'work' || paused || coachVoice.current === 'off' || workIntroLeft > 0 || timeLeft !== 6) return;
     if (nextExerciseAnnouncedRef.current) return;
     const lastEx = exerciseIdx >= exercises.length - 1;
     const lastRd = round >= rounds;
@@ -141,15 +179,15 @@ export default function Session() {
     if (!nextEx?.name) return;
     nextExerciseAnnouncedRef.current = true;
     speakNextExerciseIs(nextEx.name, coachVoice.current);
-  }, [phase, paused, timeLeft, exerciseIdx, round, rounds, exercises]);
+  }, [phase, paused, workIntroLeft, timeLeft, exerciseIdx, round, rounds, exercises]);
 
-  // ── Coach: count down last 10 seconds of work (10, 9, … 1) ───────
+  // ── Coach: count down last 10 seconds of work (10, 9, … 1) in sync with timer ─────
   useEffect(() => {
-    if (phase !== 'work' || paused || coachVoice.current === 'off') return;
+    if (phase !== 'work' || paused || coachVoice.current === 'off' || workIntroLeft > 0) return;
     if (timeLeft >= 1 && timeLeft <= 10) {
       speakCountdownNumber(timeLeft, coachVoice.current);
     }
-  }, [phase, paused, timeLeft]);
+  }, [phase, paused, workIntroLeft, timeLeft]);
 
   // ── Countdown beep: "Next in" phase, last 10 seconds ────────────
   useEffect(() => {
@@ -165,6 +203,13 @@ export default function Session() {
     if (phase === 'done' || paused) return;
 
     const id = setInterval(() => {
+      if (phase === 'work' && workIntroLeft > 0) {
+        setWorkIntroLeft((prev) => {
+          if (prev <= 1) setTimeLeft(workSeconds);
+          return Math.max(0, prev - 1);
+        });
+        return;
+      }
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (!justHitZero.current) {
@@ -180,7 +225,7 @@ export default function Session() {
 
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, paused, exerciseIdx, round]);
+  }, [phase, paused, workIntroLeft, exerciseIdx, round, workSeconds]);
 
   // ── Phase transitions ─────────────────────────────────────────────
   function advancePhase() {
@@ -210,7 +255,8 @@ export default function Session() {
         setRound((r) => r + 1);
       }
       setPhase('work');
-      setTimeLeft(workSeconds);
+      setWorkIntroLeft(10);
+      setTimeLeft(0);
     }
   }
 
@@ -301,8 +347,15 @@ export default function Session() {
 
           <TimerDisplay
             phase={phase}
-            timeLeft={timeLeft}
-            label={phase === 'work' ? currentExercise.name : nextExercise.name}
+            timeLeft={phase === 'work' && workIntroLeft > 0 ? workIntroLeft : timeLeft}
+            label={
+              phase === 'work' && workIntroLeft > 0
+                ? 'Get set'
+                : phase === 'work'
+                  ? currentExercise.name
+                  : nextExercise.name
+            }
+            phaseLabelOverride={phase === 'work' && workIntroLeft > 0 ? 'Get set' : undefined}
             variant="light"
           />
 
