@@ -22,7 +22,7 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 | **AI_STATUS.txt** | AI integration status checklist. |
 | **EXERCISE.md** | Exercise list and IDs for media naming and reference. |
 | **OPENAI_TTS_README.md** | Spec for OpenAI TTS integration (streaming + file generation). |
-| **tts-server/** | Optional Node.js TTS server for **real** coach voice (OpenAI) only. Run `npm run dev` in `tts-server/` with `OPENAI_API_KEY` in `.env`; app proxies `/api` to it. No browser synthesis fallback—silent if TTS server is not running. |
+| **tts-server/** | Optional Node.js TTS server for **real** coach voice (OpenAI). Run `npm run dev` in `tts-server/` with `OPENAI_API_KEY` in `.env`; app proxies `/api` to it. When TTS is unavailable or fails, app falls back to browser (synthetic) voice. |
 
 ---
 
@@ -32,7 +32,9 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Coach voice: real only (no synthesis)** – Coach uses only OpenAI TTS via `POST /api/tts/stream`; browser synthesis fallback removed so only one voice plays. If TTS server is down, coach is silent. Run `tts-server`: `cd tts-server && npm run dev` with `OPENAI_API_KEY` in `.env`. See `coachVoice.js`, `tts-server/src`, `vite.config.js` proxy. |
+| Latest | **Coach voice without tap** – Audio unlocks when user taps "Start session" (TimerSetup). Get Ready and Session then play coach phrases automatically (no "tap to hear coach"). GetReady auto-speaks "Get ready. You've got this!"; Session auto-announces start and all cues. See `TimerSetup.jsx`, `GetReady.jsx`, `Session.jsx`. |
+| — | **Coach voice: real TTS + synthetic fallback** – Prefer OpenAI TTS when server is available; fall back to browser (Web Speech API) when TTS is unavailable or fails. Production without `VITE_TTS_API_URL` skips `/api` (no 404) and uses synthetic only. See `coachVoice.js`. |
+| — | **Coach voice: real only (no synthesis)** – Coach uses only OpenAI TTS via `POST /api/tts/stream`; browser synthesis fallback removed so only one voice plays. If TTS server is down, coach is silent. Run `tts-server`: `cd tts-server && npm run dev` with `OPENAI_API_KEY` in `.env`. See `coachVoice.js`, `tts-server/src`, `vite.config.js` proxy. |
 | — | **Real coach voice (OpenAI TTS)** – Coach uses **real** OpenAI TTS when the TTS server is running; otherwise falls back to browser synthesis. Run `tts-server`: `cd tts-server && npm run dev` with `OPENAI_API_KEY` in `.env`. App proxies `/api` to port 3000; `coachVoice.js` calls `POST /api/tts/stream` and plays MP3. See `tts-server/src`, `vite.config.js` proxy, OPENAI_TTS_README.md. |
 | — | **OpenAI TTS server (optional)** – `tts-server/` with `example-generate.mjs`: generate speech via OpenAI API and save to `output.mp3`. Requires `OPENAI_API_KEY` in `tts-server/.env`. See OPENAI_TTS_README.md. |
 | — | **Get-ready page & encouraging coach** – After "Start session", a 10s **Get-ready** page shows the first exercise video and countdown; coach says "Get ready. You've got this!" on first tap (unlocks audio). Then flows into Session. **Session coach:** says "Go! Give it everything you've got!" at start of each exercise; counts down last 10s with encouraging phrases ("Three! Keep it up!", "Two! Almost there!", "One! Last second!"); between exercises says "Nice work! Next up, [name]. You're doing great."; session end: "Amazing work! Session complete. You crushed it today!" Coach voice **defaults to Female** (on) unless set to Off in Profile. See `GetReady.jsx`, `coachVoice.js`, `profileStorage.js`. |
@@ -70,7 +72,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 ```
 
 - **Optional:** Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for session history (see [Environment variables](#environment-variables)). Run `supabase-schema.sql` in Supabase SQL Editor if using Supabase.
-- **Optional – real coach voice (OpenAI TTS):** Run the TTS server so the app uses a real voice instead of browser synthesis. In a second terminal: `cd tts-server && npm run dev`. Add `OPENAI_API_KEY=sk-...` to `tts-server/.env` (no space after `=`). Vite proxies `/api` to the TTS server; when it’s running, coach phrases are played via OpenAI. See [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
+- **Optional – real coach voice (OpenAI TTS):** Run the TTS server so the app uses a real voice. In a second terminal: `cd tts-server && npm run dev`. Add `OPENAI_API_KEY=sk-...` to `tts-server/.env` (no space after `=`). Vite proxies `/api` to the TTS server. **Production (e.g. Netlify):** the app does not call `/api` unless `VITE_TTS_API_URL` is set, so you get no 404s on static hosting; to enable coach voice in production, deploy the TTS server (e.g. Railway, Render) and set `VITE_TTS_API_URL` to its URL at build time. See [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
 - **Full steps and troubleshooting:** [SETUP.md](SETUP.md).
 
 ---

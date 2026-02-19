@@ -26,7 +26,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getExerciseMedia } from '../lib/exerciseMedia';
 import { getCoachVoice } from '../lib/profileStorage';
 import {
-  unlockAudio,
   playCountdownBeep,
   speakStart,
   speakCountdownNumber,
@@ -70,9 +69,7 @@ export default function Session() {
   // Avoid double-firing on the tick that hits zero
   const justHitZero = useRef(false);
   const coachVoice = useRef(getCoachVoice());
-  const audioUnlockedRef = useRef(false);
   const sessionStartAnnouncedRef = useRef(false);
-  const [showTapHint, setShowTapHint] = useState(() => getCoachVoice() !== 'off');
 
   const currentExercise = exercises[exerciseIdx] || {};
   const nextExerciseIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
@@ -100,8 +97,19 @@ export default function Session() {
     };
   }, []);
 
-  // ── Coach: first announcement runs on first TAP (browsers block speech until user gesture) ─────
-  // Session-start speech is triggered from handleSessionTap below, not from an effect.
+  // ── Coach: session start (audio already unlocked by "Start session" tap) ─────
+  useEffect(() => {
+    if (
+      phase !== 'work' ||
+      coachVoice.current === 'off' ||
+      !exercises[0]?.name ||
+      sessionStartAnnouncedRef.current
+    )
+      return;
+    sessionStartAnnouncedRef.current = true;
+    const t = setTimeout(() => speakSessionStart(exercises[0].name, coachVoice.current), 100);
+    return () => clearTimeout(t);
+  }, [phase, exercises]);
 
   // ── Coach: announce session complete when phase becomes done ─────
   useEffect(() => {
@@ -197,29 +205,10 @@ export default function Session() {
     }
   }
 
-  const handleSessionTap = () => {
-    if (!audioUnlockedRef.current) {
-      unlockAudio();
-      audioUnlockedRef.current = true;
-      setShowTapHint(false);
-      // First speech MUST run in this user gesture or browsers (Chrome, Safari) block it
-      if (
-        coachVoice.current !== 'off' &&
-        exercises[0]?.name &&
-        !sessionStartAnnouncedRef.current
-      ) {
-        sessionStartAnnouncedRef.current = true;
-        speakSessionStart(exercises[0].name, coachVoice.current);
-      }
-    }
-  };
-
   const togglePause = () => {
-    handleSessionTap();
     setPaused((p) => !p);
   };
   const quit = () => {
-    handleSessionTap();
     navigate('/');
   };
 
@@ -257,7 +246,7 @@ export default function Session() {
   const showImage = (phase === 'work' || phase === 'countdown') && media.image && !imageError && !showVideo;
 
   return (
-    <div className={styles.session} onClick={handleSessionTap} role="presentation">
+    <div className={styles.session} role="presentation">
       {/* ── Background media inside mobile app boundary (max 430px) ─ */}
       <div className={styles.mediaBoundary}>
         {showVideo && (
@@ -290,13 +279,6 @@ export default function Session() {
 
         <div className={styles.overlay} />
       </div>
-
-      {/* ── Hint: tap to enable coach (browsers block audio until user gesture) ─ */}
-      {showTapHint && (
-        <div className={styles.tapHint} role="status">
-          Tap screen to hear coach voice
-        </div>
-      )}
 
       {/* ── Session UI: bottom of frame, above bottom nav ─────────── */}
       <div className={styles.content} role="presentation">

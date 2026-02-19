@@ -2,7 +2,7 @@
  * GetReady.jsx
  *
  * After "Start session": 10-second countdown with first exercise video playing.
- * Coach says "Get ready." on first tap (unlocks audio). Then flows into Session.
+ * Coach says "Get ready." automatically (audio was unlocked by the Start session tap).
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -22,7 +22,6 @@ export default function GetReady() {
   const [timeLeft, setTimeLeft] = useState(COUNTDOWN_SECONDS);
   const [mediaError, setMediaError] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const audioUnlockedRef = useRef(false);
   const coachVoice = useRef(getCoachVoice());
 
   const firstExercise = exercises[0] || {};
@@ -34,15 +33,14 @@ export default function GetReady() {
     preloadVoices();
   }, []);
 
-  const handleTap = () => {
-    if (!audioUnlockedRef.current) {
+  // Coach speaks automatically; audio was unlocked when user clicked "Start session"
+  useEffect(() => {
+    if (coachVoice.current && coachVoice.current !== 'off') {
       unlockAudio();
-      audioUnlockedRef.current = true;
-      if (coachVoice.current && coachVoice.current !== 'off') {
-        speakGetReady(coachVoice.current);
-      }
+      const t = setTimeout(() => speakGetReady(coachVoice.current), 200);
+      return () => clearTimeout(t);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -69,7 +67,7 @@ export default function GetReady() {
   }
 
   return (
-    <div className={styles.page} onClick={handleTap} role="presentation">
+    <div className={styles.page} role="presentation">
       <div className={styles.mediaBoundary}>
         {showVideo && (
           <video
@@ -98,9 +96,7 @@ export default function GetReady() {
       </div>
 
       <div className={styles.content}>
-        <p className={styles.hint}>
-          {coachVoice.current && coachVoice.current !== 'off' ? 'Tap to hear coach' : 'Tap to continue'}
-        </p>
+        <p className={styles.hint}>Get set</p>
         <div className={styles.countdown} aria-live="polite">
           {timeLeft}
         </div>

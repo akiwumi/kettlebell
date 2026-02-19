@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getDailyExercises } from '../lib/dailyRotation';
+import { unlockAudio } from '../lib/coachVoice';
 import Layout from './Layout';
 import BackLink from './BackLink';
 import PageHeader from './PageHeader';
@@ -27,6 +28,7 @@ export default function TimerSetup() {
   const [rounds, setRounds] = useState(3);
 
   const startSession = () => {
+    unlockAudio(); // Unlock before nav so coach can speak during GetReady/Session without another tap
     navigate('/get-ready', {
       state: {
         exercises,

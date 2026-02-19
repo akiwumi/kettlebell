@@ -5,10 +5,18 @@
 let audioCtx = null;
 let audioUnlocked = false;
 
-// When TTS server is running (Vite proxies /api to it), we use real OpenAI voice.
+// TTS server URL. In dev, Vite proxies /api to localhost:3000. In production, set
+// VITE_TTS_API_URL to your deployed TTS server (e.g. Railway/Render) or leave unset
+// so we don't call /api at all (avoids 404 on static hosts like Netlify).
 const TTS_API_BASE = typeof import.meta !== 'undefined' && import.meta.env?.VITE_TTS_API_URL != null
   ? import.meta.env.VITE_TTS_API_URL
   : '';
+
+// In production without VITE_TTS_API_URL, there is no TTS server (e.g. Netlify is static-only).
+// Skip the request so we don't GET/POST /api/tts/stream and get 404.
+const TTS_AVAILABLE = typeof import.meta !== 'undefined'
+  ? (import.meta.env.DEV || (import.meta.env.VITE_TTS_API_URL != null && import.meta.env.VITE_TTS_API_URL !== ''))
+  : false;
 
 let currentTTSAbort = null;
 let currentTTSAudio = null;
@@ -93,6 +101,10 @@ function stopTTS() {
 // ─── Real voice via TTS server (OpenAI) ─────────────────────────
 // Returns a Promise that resolves when playback ends, or rejects on error.
 function playViaTTS(text, voicePreference = 'female') {
+  if (!TTS_AVAILABLE) {
+    return Promise.resolve(); // Production without TTS server: no request, no 404
+  }
+
   const url = `${TTS_API_BASE}/api/tts/stream`.replace(/\/+/g, '/');
   const body = JSON.stringify({ text, voice: voicePreference });
 
@@ -138,11 +150,54 @@ function playViaTTS(text, voicePreference = 'female') {
     });
 }
 
-// ─── Speech: real voice only via TTS server (no browser synthesis) ─
-// Returns a Promise that resolves when playback ends. On TTS failure, resolves without speaking.
+// ─── Browser synthesis (Web Speech API) ─────────────────────────
+// Fallback when real TTS is unavailable or fails.
+function speakWithSynthesis(text, voicePreference = 'female') {
+  return new Promise((resolve) => {
+    if (!('speechSynthesis' in window)) {
+      resolve();
+      return;
+    }
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      const preferFemale = voicePreference === 'female';
+      const femaleHints = ['female', 'woman', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'susan'];
+      const maleHints = ['male', 'man', 'daniel', 'james', 'alex', 'fred', 'thomas', 'gordon', 'lee'];
+      const hints = preferFemale ? femaleHints : maleHints;
+      const match = voices.find(v => {
+        const name = v.name.toLowerCase();
+        return hints.some(h => name.includes(h)) && v.lang.startsWith('en');
+      });
+      if (match) utterance.voice = match;
+      else {
+        const englishVoice = voices.find(v => v.lang.startsWith('en'));
+        if (englishVoice) utterance.voice = englishVoice;
+      }
+    }
+
+    utterance.onend = resolve;
+    utterance.onerror = (e) => {
+      if (e.error !== 'interrupted') console.warn('[CoachVoice] Speech error:', e.error, e);
+      resolve();
+    };
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+// ─── Speech: real TTS when available, else synthetic ───────────────
 function speakText(text, voicePreference = 'female') {
+  if (!TTS_AVAILABLE) {
+    return speakWithSynthesis(text, voicePreference);
+  }
   return playViaTTS(text, voicePreference).catch(() => {
-    // TTS unavailable or failed: stay silent (no synthesized fallback)
+    return speakWithSynthesis(text, voicePreference);
   });
 }
 
