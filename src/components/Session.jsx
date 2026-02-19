@@ -40,7 +40,7 @@ import CueList from './CueList';
 import styles from './Session.module.css';
 
 // ── Constants ────────────────────────────────────────────────────────
-const COUNTDOWN_SECONDS = 20; // "Next in" phase
+const COUNTDOWN_SECONDS = 10; // "Next in" phase (no pause; next exercise video plays through countdown)
 
 // ── Component ────────────────────────────────────────────────────────
 export default function Session() {
@@ -73,7 +73,10 @@ export default function Session() {
   const [showTapHint, setShowTapHint] = useState(() => getCoachVoice() !== 'off');
 
   const currentExercise = exercises[exerciseIdx] || {};
-  const media = getExerciseMedia(currentExercise.id);
+  const nextExerciseIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
+  const nextExercise = exercises[nextExerciseIdx] || {};
+  const displayExercise = phase === 'work' ? currentExercise : nextExercise;
+  const media = getExerciseMedia(displayExercise.id);
 
   // ── Reset media errors when exercise changes ─────────────────────
   useEffect(() => {
@@ -232,9 +235,9 @@ export default function Session() {
     );
   }
 
-  // ── Background: only during work phase (no video on "Next in" countdown) ─
-  const showVideo = phase === 'work' && media.video && !mediaError;
-  const showImage = phase === 'work' && media.image && !imageError && !showVideo;
+  // ── Background: work = current exercise; countdown = next exercise (plays through into next card)
+  const showVideo = (phase === 'work' || phase === 'countdown') && media.video && !mediaError;
+  const showImage = (phase === 'work' || phase === 'countdown') && media.image && !imageError && !showVideo;
 
   return (
     <div className={styles.session} onClick={handleSessionTap} role="presentation">
@@ -242,7 +245,7 @@ export default function Session() {
       <div className={styles.mediaBoundary}>
         {showVideo && (
           <video
-            key={currentExercise.id}
+            key={displayExercise.id}
             ref={videoRefCallback}
             className={styles.bgVideo}
             autoPlay
@@ -260,7 +263,7 @@ export default function Session() {
 
         {showImage && (
           <img
-            key={`img-${currentExercise.id}`}
+            key={`img-${displayExercise.id}`}
             className={styles.bgImage}
             src={media.image}
             alt=""
@@ -291,7 +294,7 @@ export default function Session() {
           <TimerDisplay
             phase={phase}
             timeLeft={timeLeft}
-            label={currentExercise.name}
+            label={phase === 'work' ? currentExercise.name : nextExercise.name}
             variant="light"
           />
 
