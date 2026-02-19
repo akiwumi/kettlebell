@@ -1,6 +1,7 @@
 // src/lib/coachVoice.js
 // Coach voice: prefers OpenAI TTS (real voice) via /api/tts/stream when available;
 // falls back to Web Speech API (synthesized). Countdown beep uses Web Audio API.
+// iOS: use a single persistent <audio> element + unlock with silent play (see fix-iphone-audio.md).
 
 let audioCtx = null;
 let audioUnlocked = false;
@@ -19,7 +20,24 @@ const TTS_AVAILABLE = typeof import.meta !== 'undefined'
   : false;
 
 let currentTTSAbort = null;
-let currentTTSAudio = null;
+
+// Silent MP3 data URL for iOS: unlock the persistent audio element on first user gesture.
+const SILENT_MP3 =
+  'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRBqpAAAAAAD/+1DEAAAHAAGf9AAAIgAANIAAAARMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==';
+
+let ttsAudioEl = null;
+let ttsAudioUnlocked = false;
+
+/** Single persistent <audio> for TTS (iOS requires reuse, not new Audio() each time). */
+function getTTSAudioElement() {
+  if (ttsAudioEl) return ttsAudioEl;
+  if (typeof document === 'undefined') return null;
+  ttsAudioEl = document.createElement('audio');
+  ttsAudioEl.setAttribute('playsinline', 'true');
+  ttsAudioEl.setAttribute('webkit-playsinline', 'true');
+  document.body.appendChild(ttsAudioEl);
+  return ttsAudioEl;
+}
 
 // ─── Audio Context ─────────────────────────────────────────────
 function getAudioContext() {
@@ -30,27 +48,38 @@ function getAudioContext() {
 }
 
 // ─── Unlock Audio (MUST be called from a user gesture) ─────────
-// iOS/Safari blocks audio until a user interaction triggers playback.
-// Call this from the FIRST tap/click inside the Session component.
+// iOS/Safari: (1) Web Audio context for beeps; (2) persistent <audio> for TTS (silent play).
+// Call from the first tap that starts the session (e.g. "Start session" button).
 export function unlockAudio() {
-  if (audioUnlocked) return;
-  try {
-    const ctx = getAudioContext();
-    // Resume suspended context (Safari requirement)
-    if (ctx.state === 'suspended') {
-      ctx.resume();
+  // Web Audio API: for countdown beeps
+  if (!audioUnlocked) {
+    try {
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') ctx.resume();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      audioUnlocked = true;
+    } catch (e) {
+      console.warn('[CoachVoice] Web Audio unlock failed:', e);
     }
-    // Play a silent buffer to fully unlock
-    const buffer = ctx.createBuffer(1, 1, 22050);
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-    source.start(0);
-    audioUnlocked = true;
-    console.log('[CoachVoice] Audio unlocked');
-  } catch (e) {
-    console.warn('[CoachVoice] Audio unlock failed:', e);
   }
+
+  // HTML Audio element for TTS: iOS requires unlock with silent play on same element we reuse
+  if (ttsAudioUnlocked) return;
+  const el = getTTSAudioElement();
+  if (!el) return;
+  el.src = SILENT_MP3;
+  el.play()
+    .then(() => {
+      el.pause();
+      el.currentTime = 0;
+      el.src = '';
+      ttsAudioUnlocked = true;
+    })
+    .catch((e) => console.warn('[CoachVoice] TTS audio unlock failed:', e));
 }
 
 // ─── Beep (Web Audio API) ──────────────────────────────────────
@@ -89,12 +118,12 @@ function stopTTS() {
     currentTTSAbort.abort();
     currentTTSAbort = null;
   }
-  if (currentTTSAudio) {
+  const el = getTTSAudioElement();
+  if (el) {
     try {
-      currentTTSAudio.pause();
-      currentTTSAudio.src = '';
+      el.pause();
+      el.src = '';
     } catch (_) {}
-    currentTTSAudio = null;
   }
 }
 
@@ -127,19 +156,27 @@ function playViaTTS(text, voicePreference = 'female') {
     })
     .then((blob) => {
       const objectUrl = URL.createObjectURL(blob);
+      const audio = getTTSAudioElement();
+      if (!audio) {
+        URL.revokeObjectURL(objectUrl);
+        return Promise.reject(new Error('No TTS audio element'));
+      }
       return new Promise((resolve, reject) => {
-        const audio = new Audio(objectUrl);
-        currentTTSAudio = audio;
-        audio.onended = () => {
+        const onEnd = () => {
+          audio.removeEventListener('ended', onEnd);
+          audio.removeEventListener('error', onErr);
           URL.revokeObjectURL(objectUrl);
-          currentTTSAudio = null;
           resolve();
         };
-        audio.onerror = (e) => {
+        const onErr = (e) => {
+          audio.removeEventListener('ended', onEnd);
+          audio.removeEventListener('error', onErr);
           URL.revokeObjectURL(objectUrl);
-          currentTTSAudio = null;
           reject(e);
         };
+        audio.addEventListener('ended', onEnd);
+        audio.addEventListener('error', onErr);
+        audio.src = objectUrl;
         audio.play().catch(reject);
       });
     })
