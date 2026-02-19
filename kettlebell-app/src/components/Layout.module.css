@@ -1,0 +1,36 @@
+/* Glass background – frosted glassmorphism for main card */
+.layout {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  margin-top: 5vh;
+  padding: 1.5rem 1.25rem;
+  min-height: 50vh;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Fit between header and nav: no page scroll, card scrolls internally */
+.layoutFillViewport {
+  flex: 1;
+  min-height: 0;
+  margin-top: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}

@@ -1,0 +1,78 @@
+/* Full-screen landing overlay – first screen on app open */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 1.5rem;
+  padding-top: env(safe-area-inset-top, 1.5rem);
+  padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+  transition: opacity 0.7s ease-out;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay.dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.logo {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.tagline {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: #1e293b;
+  margin: 0 0 2.5rem;
+  font-weight: 500;
+}
+
+.cta {
+  font-size: 0.9375rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+  letter-spacing: 0.02em;
+}
+
+.footerIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
+@media (min-width: 431px) {
+  .overlay {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 430px;
+  }
+
+  .overlay.dismissed {
+    transform: translateX(-50%);
+  }
+}

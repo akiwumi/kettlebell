@@ -1,0 +1,14 @@
+.back {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  align-self: center;
+}
+
+.back:hover {
+  color: var(--accent-orange);
+  text-decoration: none;
+}

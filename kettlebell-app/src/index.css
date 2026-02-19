@@ -1,0 +1,75 @@
+/* Design system: clean, modern fitness app – light backgrounds, rounded cards, subtle shadows */
+:root {
+  /* Surfaces */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-soft: #f1f5f9;
+  --bg-accent-card: #f3e8ff;
+  /* Text */
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-muted: #000000;
+  --text-on-accent: #ffffff;
+  --text-on-orange: #000000;
+  /* Accents */
+  --accent-orange: #f59e0b;
+  --accent-orange-hover: #ea580c;
+  --accent-indigo: #4f46e5;
+  --accent-indigo-dark: #3730a3;
+  --accent-teal: #0d9488;
+  --accent-purple-soft: #e9d5ff;
+  /* Borders & shadows */
+  --border: #e2e8f0;
+  --border-focus: #f59e0b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#root {
+  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+a {
+  color: var(--accent-orange);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}

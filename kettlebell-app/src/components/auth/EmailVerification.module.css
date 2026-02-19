@@ -1,0 +1,68 @@
+.wrap {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.card {
+  max-width: 420px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+}
+
+.text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+}
+
+.text strong {
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+}
+
+.btn {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.sent {
+  font-size: 0.85rem;
+  color: var(--accent-indigo);
+  margin: 0 0 0.5rem 0;
+}
+
+.changeEmail {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.changeEmail:hover {
+  color: var(--accent-orange);
+  text-decoration: underline;
+}

@@ -1,0 +1,113 @@
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 0 1rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+
+.cardTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.bigNumber {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+}
+
+.unit {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.meterWrap {
+  height: 8px;
+  background: var(--bg-card-soft);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.meterBar {
+  height: 100%;
+  background: var(--accent-orange);
+  border-radius: var(--radius-full);
+  transition: width 0.3s;
+}
+
+.percent {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statLine {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statLine span {
+  color: var(--text-secondary);
+}
+
+.achievementList {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.achievementList li {
+  margin: 0.25rem 0;
+}
+
+.milestone {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hint {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 0 1rem;
+}
+
+.link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent-orange);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

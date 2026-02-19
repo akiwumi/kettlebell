@@ -1,0 +1,124 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+
+.heading {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.desc {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.checkLabel input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  accent-color: var(--accent-orange);
+}
+
+.shareBtn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-on-orange);
+  background: var(--accent-orange);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.shareBtn:hover:not(:disabled) {
+  background: var(--accent-orange-hover);
+}
+
+.shareBtn:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.feedback {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--accent-teal);
+}
+
+.feedbackMuted {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.feedbackError {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--accent-orange-hover);
+}
+
+.fallback {
+  margin-top: 0.75rem;
+}
+
+.preview {
+  width: 100%;
+  min-height: 140px;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.preview:focus {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.copyBtn {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent-orange);
+  background: var(--bg-card);
+  border: 1px solid var(--accent-orange);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.copyBtn:hover {
+  background: var(--bg-accent-card);
+}

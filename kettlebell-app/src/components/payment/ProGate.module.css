@@ -1,0 +1,17 @@
+.wrapper {
+  position: relative;
+  min-height: 120px;
+}
+
+.preview {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.7;
+}
+
+.loading {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  padding: 1rem 0;
+}

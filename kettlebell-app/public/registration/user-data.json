@@ -1,0 +1,128 @@
+{
+  "schema": "Complete user and exercise history data. All fields correspond to app options. Live data is stored in the app (localStorage); this file defines the structure and can hold an export.",
+  "profile": {
+    "description": "User profile (localStorage: kettlebell-profile)",
+    "fields": {
+      "id": "Optional user id",
+      "name": "Full name",
+      "age": "Age in years",
+      "gender": "Gender",
+      "photoUrl": "Profile photo: base64 data URL or URL",
+      "weight": "Current weight (kg)",
+      "height": "Height (cm)",
+      "targetWeight": "Target weight (kg)",
+      "chest": "Chest (cm)",
+      "waist": "Waist (cm)",
+      "hips": "Hips (cm)",
+      "arms": "Arms (cm)",
+      "thighs": "Thighs (cm)",
+      "calves": "Calves (cm)",
+      "fitnessLevel": "Beginner | Intermediate | Advanced",
+      "yearsExperience": "Years of experience",
+      "injuriesLimitations": "Free text",
+      "kettlebellWeights": "Array of available weights (kg)",
+      "otherEquipment": "Array: Yoga mat, Bench, Pull-up bar, etc.",
+      "spaceAvailable": "Free text",
+      "primaryGoal": "Weight Loss | Muscle Building | Strength | Endurance | General Fitness",
+      "secondaryGoals": "Array of goal strings",
+      "timeline": "4 weeks | 8 weeks | 12 weeks | 6 months | 1 year",
+      "preferredDuration": "20 min | 30 min | 45 min | 60 min",
+      "trainingDaysPerWeek": "Number",
+      "preferredTimes": "Free text",
+      "restDayPreferences": "Free text"
+    },
+    "sample": {}
+  },
+  "workoutHistory": {
+    "description": "Exercise history – every logged workout (localStorage: kettlebell-workouts)",
+    "fields": {
+      "id": "Unique workout id (timestamp string)",
+      "completedAt": "ISO 8601 date-time",
+      "plannedDurationMin": "Number or null",
+      "actualDurationMin": "Number or null",
+      "exercises": "Array of { exerciseId, exerciseName, sets, reps, weight }",
+      "rpe": "RPE 1–10 or null",
+      "energyBefore": "1–10 or null",
+      "energyAfter": "1–10 or null",
+      "modifications": "Free text or null",
+      "skipped": "Array of { exerciseId, reason } or null",
+      "prsAchieved": "Free text or null"
+    },
+    "exercisesPerEntry": {
+      "exerciseId": "From app exercises.js (e.g. swing-2h, goblet-squat)",
+      "exerciseName": "Display name",
+      "sets": "Number",
+      "reps": "Number",
+      "weight": "Weight in kg"
+    },
+    "entries": []
+  },
+  "bodyMetrics": {
+    "description": "Body metrics over time (localStorage: kettlebell-body-metrics)",
+    "fields": {
+      "date": "YYYY-MM-DD",
+      "weight": "kg or null",
+      "chest": "cm or null",
+      "waist": "cm or null",
+      "hips": "cm or null",
+      "arms": "cm or null",
+      "thighs": "cm or null",
+      "calves": "cm or null",
+      "bodyFat": "Percentage or null",
+      "clothesFit": "Free text",
+      "photoUrl": "Progress photo URL or base64"
+    },
+    "entries": []
+  },
+  "prs": {
+    "description": "Personal records (localStorage: kettlebell-prs)",
+    "fields": {
+      "date": "ISO date or string",
+      "exerciseId": "From exercises.js",
+      "exerciseName": "Display name",
+      "type": "weight | reps | time",
+      "value": "Number or string",
+      "note": "Free text or null"
+    },
+    "entries": []
+  },
+  "schedule": {
+    "description": "Schedule and reminders (localStorage: kettlebell-schedule)",
+    "fields": {
+      "preferredDays": "Array of 0–6 (Sun–Sat) for workout days",
+      "restDays": "Array of 0–6 for rest days",
+      "reminderWorkout": "Boolean",
+      "reminderWorkoutTime": "HH:mm",
+      "reminderWeighIn": "Boolean",
+      "reminderWeighInTime": "HH:mm",
+      "reminderMeasurements": "Boolean",
+      "reminderMeasurementsTime": "HH:mm",
+      "reminderPhotos": "Boolean",
+      "reminderPhotosTime": "HH:mm",
+      "deloadEveryWeeks": "0 = off, or number",
+      "deloadWeekStart": "ISO date or null"
+    },
+    "sample": {}
+  },
+  "userRoutines": {
+    "description": "User-curated routines saved in the app's routine database (IndexedDB: KettlebellUserRoutines, store: routines). Shown under My Routines tab.",
+    "fields": {
+      "id": "Unique id (e.g. custom-1234567890)",
+      "name": "Routine name",
+      "exerciseIds": "Array of exercise ids in order (from exercises.js)",
+      "createdAt": "Optional timestamp when created"
+    },
+    "entries": []
+  },
+  "sessionHistory": {
+    "description": "Completed timer sessions (Supabase: workout_sessions, or app session save)",
+    "fields": {
+      "exerciseIds": "Array of exercise ids in order",
+      "workSeconds": "Work interval seconds",
+      "restSeconds": "Rest interval seconds",
+      "rounds": "Number of rounds",
+      "completedAt": "ISO date-time or Unix ms"
+    },
+    "entries": []
+  }
+}

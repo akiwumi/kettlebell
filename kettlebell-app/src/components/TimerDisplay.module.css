@@ -1,0 +1,45 @@
+.wrap {
+  text-align: center;
+}
+
+.phase {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.5rem;
+}
+
+.time {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* Last 10 seconds of "Next in": emphasize countdown number */
+.timeCountdown {
+  font-size: 4.5rem;
+  color: var(--accent-orange);
+}
+
+.label {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Light text on dark background (e.g. session screen) */
+.wrap.light .phase,
+.wrap.light .time,
+.wrap.light .label {
+  color: #fff;
+}
+
+.wrap.light .timeCountdown {
+  color: #fbbf24;
+}

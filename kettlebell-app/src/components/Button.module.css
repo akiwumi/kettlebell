@@ -1,0 +1,91 @@
+.primary {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  background: var(--accent-orange);
+  color: var(--text-on-orange);
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+}
+
+.primary:hover {
+  background: var(--accent-orange-hover);
+  text-decoration: none;
+  box-shadow: var(--shadow-card);
+}
+
+/* 3D glass button – translucent orange, blur, depth; keep color */
+.glass {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  background: rgba(245, 158, 11, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-on-orange);
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 4px 0 rgba(180, 83, 9, 0.5),
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.glass:hover {
+  text-decoration: none;
+  transform: translateY(1px);
+  box-shadow:
+    0 3px 0 rgba(180, 83, 9, 0.45),
+    0 4px 8px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.glass:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 rgba(180, 83, 9, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.secondary {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.85rem 1.5rem;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--text-primary);
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.secondary:hover {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+  text-decoration: none;
+  box-shadow: var(--shadow-card);
+}

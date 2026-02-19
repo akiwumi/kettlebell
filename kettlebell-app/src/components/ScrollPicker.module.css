@@ -1,0 +1,128 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color 0.15s, transform 0.15s;
+}
+
+.unit {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Fade masks above and below so the center row is emphasized */
+.mask,
+.maskBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 44px; /* CENTER_OFFSET when VISIBLE_ROWS=3 */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mask {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--bg-page) 0%,
+    rgba(248, 250, 252, 0.95) 30%,
+    transparent 100%
+  );
+}
+
+.maskBottom {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--bg-page) 0%,
+    rgba(248, 250, 252, 0.95) 30%,
+    transparent 100%
+  );
+}
+
+/* Highlight band for the selected row - fixed to wrapper center so it doesn't scroll */
+.wrapper {
+  --picker-item-height: 44px;
+}
+
+.wrapper::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--picker-item-height);
+  border-radius: var(--radius-sm);
+  background: rgba(245, 158, 11, 0.12);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scroll {
+  position: relative;
+}
+
+.item {
+  position: relative;
+  z-index: 1;
+}
+
+/* Narrow mode: fit inside 80px width, text within bounds */
+.wrapperNarrow {
+  max-width: 80px;
+}
+
+.wrapperNarrow .item {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.wrapperNarrow .unit {
+  display: none;
+}
+
+.wrapperNarrow::after {
+  left: 4px;
+  right: 4px;
+}

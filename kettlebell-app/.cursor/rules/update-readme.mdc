@@ -1,0 +1,21 @@
+---
+description: Always update README when changing the codebase
+alwaysApply: true
+---
+
+# Always update the README
+
+Whenever you change the kettlebell-app codebase (features, components, routes, libs, config, or behaviour), update **README.md** in the same change set.
+
+1. **Changelog** – Add a new row to the **Changelog / updates** table (near the top) describing what changed. Put the latest change in the first data row.
+
+2. **Affected sections** – Update any sections that are no longer accurate:
+   - Routes and page components
+   - Layout / Shared UI / Data components
+   - Features (e.g. Landing, Home, Timer setup, Session, Profile)
+   - Data, lib, and services
+   - Public assets
+   - Full file tree (new or removed files)
+   - Development notes
+
+3. The README is the project’s **up-to-date reference**; keep it accurate so structure and behaviour stay documented.
