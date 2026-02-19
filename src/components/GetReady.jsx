@@ -9,7 +9,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getExerciseMedia } from '../lib/exerciseMedia';
 import { getCoachVoice } from '../lib/profileStorage';
-import { unlockAudio, speakGetReady, preloadVoices } from '../lib/coachVoice';
+import { unlockAudio, speakGetReady, preloadVoices, playCountdownBeep } from '../lib/coachVoice';
 import styles from './GetReady.module.css';
 
 const COUNTDOWN_SECONDS = 10;
@@ -33,10 +33,11 @@ export default function GetReady() {
     preloadVoices();
   }, []);
 
-  // Coach speaks automatically; audio was unlocked when user clicked "Start session"
+  // Coach speaks + countdown beep at start; audio was unlocked when user clicked "Start session"
   useEffect(() => {
+    unlockAudio();
+    playCountdownBeep(660, 150); // Start-of-countdown beep
     if (coachVoice.current && coachVoice.current !== 'off') {
-      unlockAudio();
       const t = setTimeout(() => speakGetReady(coachVoice.current), 200);
       return () => clearTimeout(t);
     }

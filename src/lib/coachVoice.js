@@ -13,11 +13,9 @@ const TTS_API_BASE = typeof import.meta !== 'undefined' && import.meta.env?.VITE
   ? import.meta.env.VITE_TTS_API_URL
   : '';
 
-// In production without VITE_TTS_API_URL, there is no TTS server (e.g. Netlify is static-only).
-// Skip the request so we don't GET/POST /api/tts/stream and get 404.
-const TTS_AVAILABLE = typeof import.meta !== 'undefined'
-  ? (import.meta.env.DEV || (import.meta.env.VITE_TTS_API_URL != null && import.meta.env.VITE_TTS_API_URL !== ''))
-  : false;
+// Try TTS when: (1) dev (Vite proxies /api to tts-server), or (2) production with same-origin
+// API (e.g. Vercel api/tts/stream.js). If request fails (404/500), we fall back to synthesis.
+const TTS_AVAILABLE = true;
 
 let currentTTSAbort = null;
 
