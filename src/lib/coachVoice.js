@@ -38,10 +38,13 @@ export function unlockAudio() {
 
 // ─── Beep (Web Audio API) ──────────────────────────────────────
 // Plays a short sine-wave beep. Used for countdown in last 10s.
+// Resumes context if suspended (e.g. Safari) so beeps play after user gesture.
 export function playCountdownBeep(frequency = 880, durationMs = 120) {
   try {
     const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
 
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -123,25 +126,53 @@ export function speak(text, voicePreference = 'female') {
   return speakText(text, voicePreference);
 }
 
-// ─── Public: announce next exercise ────────────────────────────
-// Called at the START of the "Next in" countdown phase.
+// ─── Public: get ready (pre-session countdown page) ─────────────
+export function speakGetReady(voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  return speakText("Get ready. You've got this!", voicePreference);
+}
+
+// ─── Public: start (at beginning of each exercise work phase) ───
+export function speakStart(voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  return speakText("Go! Give it everything you've got!", voicePreference);
+}
+
+// ─── Public: countdown number (last 10 seconds of work); encouraging on 3, 2, 1
+export function speakCountdownNumber(n, voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  if (n < 1 || n > 10) return Promise.resolve();
+  const words = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const base = words[n].charAt(0).toUpperCase() + words[n].slice(1);
+  const text = n === 3 ? 'Three! Keep it up!' : n === 2 ? 'Two! Almost there!' : n === 1 ? 'One! Last second!' : base;
+  return speakText(text, voicePreference);
+}
+
+// ─── Public: next exercise is (at end of exercise, before "Next in" countdown)
+export function speakNextExerciseIs(exerciseName, voicePreference = 'female') {
+  if (!voicePreference || voicePreference === 'off') return Promise.resolve();
+  const text = `Nice work! Next up, ${exerciseName}. You're doing great.`;
+  return speakText(text, voicePreference);
+}
+
+// ─── Public: announce next exercise (legacy / alternate) ─────────
 export function speakNextExercise(exerciseName, voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
-  const text = `Next up: ${exerciseName}. Get ready.`;
+  const text = `Next up: ${exerciseName}. Get ready. You've got this.`;
   return speakText(text, voicePreference);
 }
 
 // ─── Public: announce session start ────────────────────────────
 export function speakSessionStart(exerciseName, voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
-  const text = `Let's go! Starting with ${exerciseName}.`;
+  const text = `Let's go! You're going to crush this. Starting with ${exerciseName}.`;
   return speakText(text, voicePreference);
 }
 
 // ─── Public: announce session complete ─────────────────────────
 export function speakSessionComplete(voicePreference = 'female') {
   if (!voicePreference || voicePreference === 'off') return Promise.resolve();
-  return speakText('Great work! Session complete.', voicePreference);
+  return speakText("Amazing work! Session complete. You crushed it today!", voicePreference);
 }
 
 // ─── Preload voices ────────────────────────────────────────────

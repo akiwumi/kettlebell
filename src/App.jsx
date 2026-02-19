@@ -5,6 +5,7 @@ import Landing from './components/Landing';
 import Home from './components/Home';
 import Session from './components/Session';
 import TimerSetup from './components/TimerSetup';
+import GetReady from './components/GetReady';
 import Library from './components/Library';
 import Profile from './components/Profile';
 import DataLayout from './components/DataLayout';
@@ -66,6 +67,7 @@ function AppContent() {
           <Route path="/library" element={<Library />} />
           <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/timer-setup" element={<TimerSetup />} />
+          <Route path="/get-ready" element={<GetReady />} />
           <Route path="/session" element={<Session />} />
         </Route>
         <Route path="/auth/callback" element={<AuthCallback />} />

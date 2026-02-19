@@ -83,7 +83,7 @@ const defaultProfile = {
   trainingDaysPerWeek: '',
   preferredTimes: '',
   restDayPreferences: '',
-  coachVoice: 'off', // 'off' | 'female' | 'male' – voice that explains next exercise during countdown
+  coachVoice: 'female', // 'off' | 'female' | 'male' – default on so coach speaks during session
 };
 
 function loadProfile() {
@@ -111,7 +111,7 @@ export default function Profile() {
         ...p,
         name: authProfile.full_name,
         photoUrl: authProfile.avatar_url || p.photoUrl,
-        coachVoice: authProfile.coach_voice || p.coachVoice || 'off',
+        coachVoice: authProfile.coach_voice ?? p.coachVoice ?? 'female',
       }));
     }
   }, [authProfile?.id, authProfile?.full_name, authProfile?.avatar_url, authProfile?.coach_voice]);

@@ -27,7 +27,7 @@ export default function TimerSetup() {
   const [rounds, setRounds] = useState(3);
 
   const startSession = () => {
-    navigate('/session', {
+    navigate('/get-ready', {
       state: {
         exercises,
         workSeconds: Number(workSeconds) || 30,

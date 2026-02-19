@@ -24,9 +24,11 @@ export function getPhotoUrl() {
   return p.photoUrl || '';
 }
 
-/** Coach voice for session: 'off' | 'female' | 'male' */
+/** Coach voice for session: 'off' | 'female' | 'male'. Default 'female' so coach is on. */
 export function getCoachVoice() {
   const p = loadProfile();
   const v = p.coachVoice;
-  return v === 'female' || v === 'male' ? v : 'off';
+  if (v === 'off') return 'off';
+  if (v === 'male') return 'male';
+  return 'female'; // default when unset or 'female'
 }

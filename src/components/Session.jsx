@@ -28,7 +28,9 @@ import { getCoachVoice } from '../lib/profileStorage';
 import {
   unlockAudio,
   playCountdownBeep,
-  speakNextExercise,
+  speakStart,
+  speakCountdownNumber,
+  speakNextExerciseIs,
   speakSessionStart,
   speakSessionComplete,
   preloadVoices,
@@ -107,17 +109,32 @@ export default function Session() {
     speakSessionComplete(coachVoice.current);
   }, [phase]);
 
-  // ── Coach: announce next exercise when entering countdown ────────
+  // ── Coach: "Start" at beginning of each work phase ───────────────
+  useEffect(() => {
+    if (phase !== 'work' || coachVoice.current === 'off') return;
+    const t = setTimeout(() => speakStart(coachVoice.current), 80);
+    return () => clearTimeout(t);
+  }, [phase, exerciseIdx, round]);
+
+  // ── Coach: "And now the next exercise is X" when entering countdown ─
   useEffect(() => {
     if (phase !== 'countdown' || !exercises.length || coachVoice.current === 'off') return;
     const nextIdx = exerciseIdx < exercises.length - 1 ? exerciseIdx + 1 : 0;
     const nextEx = exercises[nextIdx];
     if (!nextEx?.name) return;
-    const t = setTimeout(() => speakNextExercise(nextEx.name, coachVoice.current), 120);
+    const t = setTimeout(() => speakNextExerciseIs(nextEx.name, coachVoice.current), 120);
     return () => clearTimeout(t);
   }, [phase, exerciseIdx, exercises]);
 
-  // ── Countdown beep: last 10 seconds, higher pitch for last 3 ──────
+  // ── Coach: count down last 10 seconds of work (10, 9, … 1) ───────
+  useEffect(() => {
+    if (phase !== 'work' || paused || coachVoice.current === 'off') return;
+    if (timeLeft >= 1 && timeLeft <= 10) {
+      speakCountdownNumber(timeLeft, coachVoice.current);
+    }
+  }, [phase, paused, timeLeft]);
+
+  // ── Countdown beep: "Next in" phase, last 10 seconds ────────────
   useEffect(() => {
     if (phase !== 'countdown' || paused || coachVoice.current === 'off') return;
     if (timeLeft >= 1 && timeLeft <= 10) {
