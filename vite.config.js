@@ -8,7 +8,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-router': ['react-router-dom'],
+          // Keep React + react-router-dom together so React is defined when router runs
+          'vendor-react': ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom'],
           'vendor-recharts': ['recharts'],
           'vendor-supabase': ['@supabase/supabase-js'],
         },
