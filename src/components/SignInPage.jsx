@@ -17,19 +17,27 @@ export default function SignInPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const SIGN_IN_TIMEOUT_MS = 20000;
+  const isStandalone =
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true);
+  // In browser: 20s timeout to avoid hanging. In PWA/standalone: no timeout so login can complete (slower networks/WebView).
+  const SIGN_IN_TIMEOUT_MS = isStandalone ? 0 : 20000;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const result = await Promise.race([
-        signIn(email.trim(), password),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), SIGN_IN_TIMEOUT_MS)
-        ),
-      ]);
+      const result =
+        SIGN_IN_TIMEOUT_MS > 0
+          ? await Promise.race([
+              signIn(email.trim(), password),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('timeout')), SIGN_IN_TIMEOUT_MS)
+              ),
+            ])
+          : await signIn(email.trim(), password);
       const { data, error: err } = result;
       if (err) {
         setError(err.message || 'Sign in failed');
@@ -39,15 +47,9 @@ export default function SignInPage() {
         navigate(returnTo, { replace: true });
       }
     } catch (err) {
-      const isStandalone =
-        typeof window !== 'undefined' &&
-        (window.matchMedia('(display-mode: standalone)').matches ||
-          window.navigator.standalone === true);
       if (err?.message === 'timeout') {
         setError(
-          isStandalone
-            ? 'Sign-in is taking too long. Open this app in your browser (Safari or Chrome), sign in there, then open the app from your home screen again.'
-            : 'Sign-in is taking too long. Check your connection and try again.'
+          'Sign-in is taking too long. Check your connection and try again.'
         );
       } else {
         setError(err?.message || 'Sign in failed');
@@ -98,6 +100,18 @@ export default function SignInPage() {
           <p className={styles.adminLink}>
             <Link to="/admin-login">Admin</Link>
           </p>
+          {isStandalone && (
+            <p className={styles.openInBrowser}>
+              Sign-in not working here?{' '}
+              <a
+                href={`${typeof window !== 'undefined' ? window.location.origin : ''}/sign-in`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open in browser to sign in
+              </a>
+            </p>
+          )}
         </form>
         <section className={styles.goPro} aria-label="Go Pro">
           <span className={styles.goProBadge}>Go Pro</span>

@@ -90,6 +90,22 @@
   text-decoration: underline;
 }
 
+.openInBrowser {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.openInBrowser a {
+  color: var(--accent-indigo);
+  text-decoration: none;
+}
+
+.openInBrowser a:hover {
+  text-decoration: underline;
+}
+
 .goPro {
   margin-top: 1.5rem;
   padding: 0.9rem 1rem;

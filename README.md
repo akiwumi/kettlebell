@@ -34,7 +34,7 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Sign-in in PWA/home screen** – Supabase client uses explicit auth storage for PWA/standalone. Sign-in has a 20s timeout with a message for home-screen users: if it times out, suggest opening the app in the browser, signing in there, then using the home screen app again. See supabaseClient.js, SignInPage.jsx. |
+| Latest | **Login allowed for PWA** – When opened from the home screen (PWA), sign-in has no timeout so login can complete; in-browser sign-in still uses a 20s timeout. Auth storage remains async with in-memory fallback; sign-in page shows “Open in browser to sign in” when running as PWA. See SignInPage.jsx. |
 | — | **Admin login** – Optional admin access via env `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`. Sign in at `/admin-login` (link on sign-in page) to get full access to all app areas (Pro gates bypassed). Admin state stored in sessionStorage; "End admin session" in Profile. AdminContext, AdminLoginPage, ProGate/Home/ProBanner/Profile/WelcomeScreen respect `isAdmin`. |
 | — | **Pull-down reset on all pages; 404 on reload** – Pull-down-to-reset now uses the scrollable container under the pointer (Layout card or main content), so it works on every page. vercel.json rewrites all routes to index.html; added public/_redirects for Netlify/other hosts. Redeploy after pull to apply 404 fix. |
 | — | **Add to Home Screen popup on Home** – When the user opens the home screen, a popup encourages adding the app to the device home screen. On browsers that support it (e.g. Android Chrome), an “Add to Home Screen” button triggers the install prompt automatically; on iOS, short Safari instructions are shown. Dismissal is stored in sessionStorage so the popup doesn’t reappear in the same session. See AddToHomeScreenPopup.jsx, Home.jsx. |
@@ -416,7 +416,7 @@ kettlebell-app/
 ### Profile
 
 - **Upgrade to Pro** – Logged-in free users see a "Pro subscription" section with an "Upgrade to Pro" button (Stripe checkout). Pro users see "Manage subscription" instead.
-- **Add to Home Screen** – Instructions to add the app icon to the phone home screen (iOS: Share → Add to Home Screen; Android: menu → Add to Home screen), plus optional "Install app" button when the browser supports it.
+- **Add to Home Screen** – Instructions to add the app icon to the phone home screen (iOS: Share → Add to Home Screen; Android: menu → Add to Home screen), plus optional "Install app" button when the browser supports it. When the app is opened from the home screen (standalone/PWA), sign-in uses an async auth storage adapter with in-memory fallback; if sign-in fails or times out, the sign-in page shows “Open in browser to sign in” so the user can try in Safari/Chrome (session does not carry back to the PWA on iOS).
 - **Basic info** – Name, age, gender, photo, weight, height, target weight, body measurements, fitness level, experience, injuries.
 - **Coach voice** – Off / Female / Male. Default **Female** (coach on). When on, encouraging phrases during Get-ready, Session (Start, countdown 3-2-1, next exercise, complete); beep in last 10s of “Next in”.
 - **Edit photo** – Button to upload a profile picture; image stored as base64 in profile (compressed if needed) so it persists. With a backend, photos can be stored under `public/registration/profile-photos/`.
