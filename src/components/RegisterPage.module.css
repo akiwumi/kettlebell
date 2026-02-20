@@ -100,3 +100,37 @@
 .signIn a:hover {
   text-decoration: underline;
 }
+
+.goPro {
+  margin-top: 1.5rem;
+  padding: 0.9rem 1rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.goProBadge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-on-orange, #1a1a1a);
+  background: var(--accent-orange);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.4rem;
+}
+
+.goProTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem 0;
+  color: var(--text-primary);
+}
+
+.goProDesc {
+  font-size: 0.85rem;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}

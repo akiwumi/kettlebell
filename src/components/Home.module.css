@@ -71,6 +71,24 @@
   min-width: 0;
 }
 
+.loginBtn {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-indigo);
+  background: rgba(255, 255, 255, 0.35);
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.loginBtn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--accent-indigo);
+  text-decoration: none;
+}
+
 .heroTitle {
   font-size: 0.95rem;
   font-weight: 600;

@@ -53,6 +53,11 @@ export default function Home() {
               <h1 className={styles.heroTitle}>Welcome back</h1>
               <p className={styles.welcomeMessage}>{welcome}</p>
             </div>
+            {!user && (
+              <Link to="/sign-in" className={styles.loginBtn} aria-label="Log in">
+                Log in
+              </Link>
+            )}
           </div>
         </header>
 

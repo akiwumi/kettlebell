@@ -46,3 +46,16 @@
   margin-top: 0.35rem;
   align-self: flex-start;
 }
+
+.loginLink {
+  margin-top: 0.35rem;
+  align-self: flex-start;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-indigo);
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}

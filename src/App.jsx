@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import Landing from './components/Landing';
@@ -7,7 +7,7 @@ import Session from './components/Session';
 import TimerSetup from './components/TimerSetup';
 import GetReady from './components/GetReady';
 import Library from './components/Library';
-import Profile from './components/Profile';
+import ProfileGate from './components/ProfileGate';
 import DataLayout from './components/DataLayout';
 import DataHome from './components/DataHome';
 import WorkoutLog from './components/WorkoutLog';
@@ -34,6 +34,14 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // On full page refresh, go to home but keep auth (session is restored by AuthContext).
+  useEffect(() => {
+    const nav = performance.getEntriesByType?.('navigation')?.[0];
+    if (nav?.type === 'reload' && location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, []);
+
   const handleLandingDismiss = () => {
     setLandingDismissed(true);
     if (location.pathname !== '/') {
@@ -51,7 +59,7 @@ function AppContent() {
           <Route path="/progress" element={<Progress />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/community" element={<Community />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<ProfileGate />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/sign-in" element={<SignInPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

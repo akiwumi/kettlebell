@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './Layout';
 import BackLink from './BackLink';
 import PageHeader from './PageHeader';
@@ -49,8 +49,10 @@ function compressDataUrl(dataUrl) {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo || '/';
   const { signUp } = useAuth();
-  // After registration we always go to Home; Pro upgrade is opt-in from Profile.
+  // After registration we go to returnTo or Home; Pro upgrade is opt-in from Profile.
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -98,7 +100,7 @@ export default function RegisterPage() {
       setError('An account with this email already exists. Sign in instead.');
       return;
     }
-    navigate('/', { replace: true });
+    navigate(returnTo, { replace: true });
   };
 
   return (
@@ -176,9 +178,16 @@ export default function RegisterPage() {
             {loading ? 'Creating account…' : 'Create account'}
           </Button>
           <p className={styles.signIn}>
-            Already have an account? <Link to="/sign-in">Sign in</Link>
+            Already have an account? <Link to="/sign-in" state={location.state}>Sign in</Link>
           </p>
         </form>
+        <section className={styles.goPro} aria-label="Go Pro">
+          <span className={styles.goProBadge}>Go Pro</span>
+          <h3 className={styles.goProTitle}>Unlock all features — €3/month</h3>
+          <p className={styles.goProDesc}>
+            Workout plans, full analytics, AI assistant, custom routines & more. Upgrade anytime from Profile.
+          </p>
+        </section>
       </div>
     </Layout>
   );

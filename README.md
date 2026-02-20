@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Register = free account only; Pro opt-in from Profile; Add to Home Screen** – After registration users go to Home (no automatic Pro/checkout). Pro upgrade only via Profile: dedicated "Upgrade to Pro" button (Stripe). ProBanner/ProGate: guests see "Sign up" (no checkout redirect); copy clarifies upgrade from Profile. PWA: `public/manifest.json`, theme-color and apple-mobile-web-app meta, `AddToHomeScreen` in Profile with iOS/Android instructions and optional Install button. See RegisterPage, ProBanner, ProGate, Profile, AddToHomeScreen, index.html. |
+| Latest | **Profile → login when guest; Home login button; Go Pro on sign-in/register; refresh → home, keep auth** – Tapping Profile in menu/bar: if not logged in, redirects to sign-in (with “Create account” link); if logged in, goes to Profile. Home top card: small “Log in” button for guests. ProBanner: Sign up button removed for guests; “Log in” link instead. Go Pro copy (€3/month, unlock features) moved into SignInPage and RegisterPage. After sign-in/register, redirect uses `returnTo` (e.g. back to Profile). Full page refresh always navigates to home while keeping login (session restored by AuthContext). See ProfileGate, App.jsx, Home.jsx, ProBanner, SignInPage, RegisterPage. |
+| — | **Register = free account only; Pro opt-in from Profile; Add to Home Screen** – After registration users go to Home (no automatic Pro/checkout). Pro upgrade only via Profile: dedicated "Upgrade to Pro" button (Stripe). ProBanner/ProGate: guests see "Sign up" (no checkout redirect); copy clarifies upgrade from Profile. PWA: `public/manifest.json`, theme-color and apple-mobile-web-app meta, `AddToHomeScreen` in Profile with iOS/Android instructions and optional Install button. See RegisterPage, ProBanner, ProGate, Profile, AddToHomeScreen, index.html. |
 | — | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
 | — | **Unilateral exercises: swap sides** – Exercises with `isUnilateral: true` run twice (Side 1, then Side 2). When Side 1 timer hits zero, coach says "And now, swap sides", swap overlay (⇄) shows 1.5s, then timer resets to original duration for Side 2. UI shows "Side 1 of 2" / "Side 2 of 2". See `src/data/exercises.js` (isUnilateral), `Session.jsx` (phase 'swap', currentSide), `coachVoice.js` (speakSwapSides), swap-sides-feature-spec.md. |
 | — | **Coach: longer tone, 10s intro, first exercise, random encouragement** – Longer start-of-exercise tone (500ms) at each exercise. Coach counts down from 10 at the start of every exercise ("Get set" 10…1), then work timer runs. First exercise of the session is announced (random session-start phrase). Random encouragement for "Go!" and mid-work (halfway through each exercise). Last 10 seconds of work counted in sync with timer. See `coachVoice.js` (playStartOfExerciseTone, START_PHRASES, MID_WORK_PHRASES, SESSION_START_PHRASES), `Session.jsx` (workIntroLeft, TimerDisplay phaseLabelOverride). |
@@ -93,7 +94,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 |------|------|
 | `index.html` | Entry HTML; loads `src/main.jsx` |
 | `src/main.jsx` | Mounts React app with `<AuthProvider>` and `<App />` |
-| `src/App.jsx` | React Router; defines all routes; wraps routes in `<AppLayout />`; renders **Landing** overlay; routes for `/auth/callback`, `/payment/success`, `/payment/cancel`, `/goals` |
+| `src/App.jsx` | React Router; defines all routes; on full page refresh navigates to home (auth preserved); wraps routes in `<AppLayout />`; renders **Landing** overlay; routes for `/auth/callback`, `/payment/success`, `/payment/cancel`, `/goals` |
 | `src/components/AppLayout.jsx` | Shell: **top header** (fixed, horizontal Kettlebell Mastery logo), full-screen background, `<main>` for content, `BottomNav`, `MenuDrawer` |
 | `src/components/Landing.jsx` | First screen: full-screen overlay with logo, tagline, “Tap screen to continue”; dissolves to Home on tap |
 
@@ -101,7 +102,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 
 | Path | Component | Description |
 |------|-----------|-------------|
-| `/` | **Home** | Dashboard: welcome, Pro banner (free users), cards with lock badges (Pro), “Choose routine” button |
+| `/` | **Home** | Dashboard: welcome, “Log in” in top card (guests), Pro banner (free users; “Log in” link for guests, “Upgrade now” for logged-in), cards with lock badges (Pro), “Choose routine” button |
 | `/auth/callback` | **AuthCallback** | Email verification / password reset redirect handler |
 | `/payment/success` | **PaymentSuccess** | Post-Stripe checkout success; confirms Pro access |
 | `/payment/cancel` | **PaymentCancel** | User canceled checkout |
@@ -115,7 +116,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | `/progress` | **Progress** | Charts: weight, measurements, volume, heat map, strength, goals (ProGate) |
 | `/schedule` | **Schedule** | Workout/rest days, deload, reminders |
 | `/community` | **Community** | Share with friends + placeholders |
-| `/profile` | **Profile** | Profile form; Upgrade to Pro (Stripe) for non-Pro users; Manage Subscription for Pro; Add to Home Screen instructions; Sign out when logged in |
+| `/profile` | **ProfileGate** | If logged in: **Profile** (form, Upgrade to Pro, Manage Subscription, Add to Home Screen, Sign out). If not: redirect to sign-in with returnTo so user returns to Profile after login/register. |
 | `/library` | **Library** | Exercise library with category filter and expandable cues |
 | `/data` | **DataLayout** + **DataHome** | Data shell; overview cards (ProGate) to sub-pages |
 | `/data/workouts` | **WorkoutLog** | Log a workout: date, duration, exercises, RPE, energy, skipped, PRs |
@@ -129,8 +130,9 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | Component | Purpose |
 |-----------|---------|
 | **AppLayout** | Wrapper: fixed transparent top header (horizontal logo), background, main content area (fits between header and nav, no page scroll), BottomNav, MenuDrawer |
-| **BottomNav** | Fixed bottom bar: Home, Profile, Data, Exercises, Menu (hamburger) |
-| **MenuDrawer** | Slide-up drawer from Menu: links to all sections (Main, Progress, Data, Schedule, Community, Profile, Exercises) |
+| **BottomNav** | Fixed bottom bar: Home, Profile, Data, Exercises, Menu (hamburger); Profile goes to /profile (login if guest via ProfileGate) |
+| **MenuDrawer** | Slide-up drawer from Menu: links to all sections (Main, Progress, Data, Schedule, Community, Profile, Exercises); Profile → /profile (login if guest) |
+| **ProfileGate** | Wraps /profile route: if logged in renders Profile; if not, redirects to sign-in with returnTo so user returns to Profile after login/register |
 | **Landing** | First screen on open: logo, tagline, “Tap screen to continue”; white full-screen overlay; dissolve to Home on tap |
 | **Layout** | Page wrapper: max-width, glass panel, centred content; `fillViewport` (default true) fits card between header and nav with scroll inside card; Library uses `fillViewport={false}` |
 | **PageHeader** | Title + optional subtitle |
@@ -264,6 +266,7 @@ kettlebell-app/
     │   ├── PageHeader.jsx, PageHeader.module.css
     │   ├── AddToHomeScreen.jsx, AddToHomeScreen.module.css
     │   ├── Profile.jsx, Profile.module.css
+    │   ├── ProfileGate.jsx
     │   ├── Progress.jsx, Progress.module.css
     │   ├── RoutinePage.jsx, RoutinePage.module.css
     │   ├── Schedule.jsx, Schedule.module.css
