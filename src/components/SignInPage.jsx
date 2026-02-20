@@ -20,24 +20,16 @@ export default function SignInPage() {
   const isStandalone =
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
       window.navigator.standalone === true);
-  // In browser: 20s timeout to avoid hanging. In PWA/standalone: no timeout so login can complete (slower networks/WebView).
-  const SIGN_IN_TIMEOUT_MS = isStandalone ? 0 : 20000;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const result =
-        SIGN_IN_TIMEOUT_MS > 0
-          ? await Promise.race([
-              signIn(email.trim(), password),
-              new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('timeout')), SIGN_IN_TIMEOUT_MS)
-              ),
-            ])
-          : await signIn(email.trim(), password);
+      const result = await signIn(email.trim(), password);
       const { data, error: err } = result;
       if (err) {
         setError(err.message || 'Sign in failed');
@@ -47,13 +39,7 @@ export default function SignInPage() {
         navigate(returnTo, { replace: true });
       }
     } catch (err) {
-      if (err?.message === 'timeout') {
-        setError(
-          'Sign-in is taking too long. Check your connection and try again.'
-        );
-      } else {
-        setError(err?.message || 'Sign in failed');
-      }
+      setError(err?.message || 'Sign in failed');
     } finally {
       setLoading(false);
     }
