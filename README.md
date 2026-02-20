@@ -461,7 +461,7 @@ Use these exact IDs as filenames (no extension in the ID):
 
 - **React 18** – UI and hooks.
 - **React Router 6** – Client-side routes.
-- **Vite** – Dev server, build, preview.
+- **Vite** – Dev server, build, preview. Do not put React in a separate `manualChunks` entry in `vite.config.js`; it causes "React is not defined" and a blank deploy because the main bundle runs before the React chunk.
 - **CSS Modules** – Component-scoped styles (`*.module.css`).
 - **Recharts** – Charts on Progress and dashboard.
 - **Supabase** (optional) – Postgres for `workout_sessions`; app works without env vars.
