@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **PWA portrait lock** – Home-screen PWA is locked to portrait: manifest `orientation: portrait` and runtime Screen Orientation API when supported (e.g. Android). See public/manifest.json, App.jsx. |
+| Latest | **Home: Log out button** – When the user is signed in, the top card shows a "Log out" button in place of "Log in"; tap to sign out. See Home.jsx. |
+| — | **PWA portrait lock** – Home-screen PWA is locked to portrait: manifest `orientation: portrait` and runtime Screen Orientation API when supported (e.g. Android). See public/manifest.json, App.jsx. |
 | — | **Log out in menu** – Hamburger menu shows a "Log out" button at the bottom when the user is signed in; tap to sign out, close the menu, and return to home. See MenuDrawer.jsx. |
 | — | **PWA sign-in: no client timeout** – Sign-in no longer uses a client-side timeout (was causing PWA to time out). Standalone detection broadened (standalone, fullscreen, minimal-ui, navigator.standalone). Sign-in page shows “Open in browser to sign in” when running as PWA. See SignInPage.jsx. |
 | — | **Admin login** – Optional admin access via env `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`. Sign in at `/admin-login` (link on sign-in page) to get full access to all app areas (Pro gates bypassed). Admin state stored in sessionStorage; "End admin session" in Profile. AdminContext, AdminLoginPage, ProGate/Home/ProBanner/Profile/WelcomeScreen respect `isAdmin`. |

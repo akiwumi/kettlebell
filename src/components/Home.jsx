@@ -27,7 +27,7 @@ function LockBadge() {
 }
 
 export default function Home() {
-  const { user, profile, isPro } = useAuth();
+  const { user, profile, isPro, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const name = profile?.full_name?.trim() || getDisplayName();
   const photoUrl = profile?.avatar_url || getPhotoUrl();
@@ -57,10 +57,19 @@ export default function Home() {
               <h1 className={styles.heroTitle}>Welcome back</h1>
               <p className={styles.welcomeMessage}>{welcome}</p>
             </div>
-            {!user && (
+            {!user ? (
               <Link to="/sign-in" className={styles.loginBtn} aria-label="Log in">
                 Log in
               </Link>
+            ) : (
+              <button
+                type="button"
+                className={styles.loginBtn}
+                onClick={() => signOut()}
+                aria-label="Log out"
+              >
+                Log out
+              </button>
             )}
           </div>
         </header>
