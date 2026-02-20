@@ -18,6 +18,21 @@ export default function AppLayout() {
 
   const getClientY = (e) => e.touches?.[0]?.clientY ?? e.clientY;
 
+  /** True if the scrollable container for this target is at the top (pull-down reset works on all pages). */
+  const isScrollAtTop = useCallback((target) => {
+    const root = mainContentRef.current;
+    if (!root) return true;
+    let el = target;
+    while (el && root.contains(el)) {
+      const style = window.getComputedStyle(el);
+      const oy = style.overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight)
+        return el.scrollTop <= 0;
+      el = el.parentElement;
+    }
+    return root.scrollTop <= 0;
+  }, []);
+
   const handlePullStart = useCallback(() => {
     pullFired.current = false;
   }, []);
@@ -25,14 +40,14 @@ export default function AppLayout() {
   const handlePullMove = useCallback((e) => {
     if (!resetApp || !mainContentRef.current || pullFired.current) return;
     if (e.touches == null && !mouseDown.current) return;
-    const el = mainContentRef.current;
-    if (el.scrollTop > 0) return;
+    const target = e.target;
+    if (!isScrollAtTop(target)) return;
     const y = getClientY(e);
     if (y - pullStartY.current >= PULL_THRESHOLD_PX) {
       pullFired.current = true;
       resetApp();
     }
-  }, [resetApp]);
+  }, [resetApp, isScrollAtTop]);
 
   const handlePointerDown = useCallback((e) => {
     pullStartY.current = getClientY(e);

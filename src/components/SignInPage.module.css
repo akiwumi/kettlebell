@@ -75,6 +75,21 @@
   text-decoration: underline;
 }
 
+.adminLink {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.adminLink a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.adminLink a:hover {
+  text-decoration: underline;
+}
+
 .goPro {
   margin-top: 1.5rem;
   padding: 0.9rem 1rem;

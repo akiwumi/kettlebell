@@ -70,6 +70,9 @@ export default function SignInPage() {
           <p className={styles.register}>
             Don&apos;t have an account? <Link to="/register" state={location.state}>Create account</Link>
           </p>
+          <p className={styles.adminLink}>
+            <Link to="/admin-login">Admin</Link>
+          </p>
         </form>
         <section className={styles.goPro} aria-label="Go Pro">
           <span className={styles.goProBadge}>Go Pro</span>

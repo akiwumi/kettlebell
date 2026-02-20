@@ -6,6 +6,7 @@ import Button from './Button';
 import ManageSubscription from './payment/ManageSubscription';
 import ProGate from './payment/ProGate';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 import { createCheckoutSession } from '../lib/stripeClient';
 import AddToHomeScreen from './AddToHomeScreen';
 import styles from './Profile.module.css';
@@ -107,6 +108,7 @@ export default function Profile() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile: authProfile, signOut, updateProfile, isPro } = useAuth();
+  const { isAdmin, adminLogout } = useAdmin();
   const [profile, setProfile] = useState(loadProfile);
   const [dismissedPasswordReset, setDismissedPasswordReset] = useState(false);
   const passwordReset = location.state?.passwordReset && !dismissedPasswordReset;
@@ -484,7 +486,7 @@ export default function Profile() {
 
         <Button type="submit">Save profile</Button>
 
-        {user && !isPro && (
+        {user && !isPro && !isAdmin && (
           <section className={styles.section} aria-label="Upgrade to Pro">
             <h2 className={styles.sectionTitle}>Pro subscription</h2>
             <p className={styles.audioDescription}>
@@ -511,6 +513,15 @@ export default function Profile() {
         <ManageSubscription />
 
         <AddToHomeScreen />
+
+        {isAdmin && (
+          <section className={styles.section} aria-label="Admin">
+            <p className={styles.adminBadge}>Admin mode — full access to all areas</p>
+            <Button type="button" variant="secondary" onClick={adminLogout}>
+              End admin session
+            </Button>
+          </section>
+        )}
 
         {user && (
           <div className={styles.signOutWrap}>

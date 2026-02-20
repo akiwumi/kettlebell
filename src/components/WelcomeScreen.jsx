@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import Button from './Button';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 import { createCheckoutSession } from '../lib/stripeClient';
 import styles from './WelcomeScreen.module.css';
 
@@ -11,9 +12,10 @@ import styles from './WelcomeScreen.module.css';
 export default function WelcomeScreen() {
   const navigate = useNavigate();
   const { user, isPro } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const handleGoPro = () => {
-    if (user?.email && !isPro) {
+    if (user?.email && !isPro && !isAdmin) {
       createCheckoutSession(user.email).catch(() => {});
       return;
     }
@@ -33,13 +35,13 @@ export default function WelcomeScreen() {
             Your account is confirmed. You’re all set to track workouts and progress.
           </p>
           <div className={styles.actions}>
-            {!isPro && (
+            {!(isPro || isAdmin) && (
               <Button onClick={handleGoPro} className={styles.primaryBtn}>
                 Go Pro — €3/month
               </Button>
             )}
             <Button onClick={handleLater} variant="secondary" className={styles.secondaryBtn}>
-              {isPro ? 'Continue to home' : 'Do it later'}
+              {(isPro || isAdmin) ? 'Continue to home' : 'Do it later'}
             </Button>
           </div>
         </div>

@@ -34,7 +34,9 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Add to Home Screen popup on Home** – When the user opens the home screen, a popup encourages adding the app to the device home screen. On browsers that support it (e.g. Android Chrome), an “Add to Home Screen” button triggers the install prompt automatically; on iOS, short Safari instructions are shown. Dismissal is stored in sessionStorage so the popup doesn’t reappear in the same session. See AddToHomeScreenPopup.jsx, Home.jsx. |
+| Latest | **Admin login** – Optional admin access via env `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`. Sign in at `/admin-login` (link on sign-in page) to get full access to all app areas (Pro gates bypassed). Admin state stored in sessionStorage; "End admin session" in Profile. AdminContext, AdminLoginPage, ProGate/Home/ProBanner/Profile/WelcomeScreen respect `isAdmin`. |
+| — | **Pull-down reset on all pages; 404 on reload** – Pull-down-to-reset now uses the scrollable container under the pointer (Layout card or main content), so it works on every page. vercel.json rewrites all routes to index.html; added public/_redirects for Netlify/other hosts. Redeploy after pull to apply 404 fix. |
+| — | **Add to Home Screen popup on Home** – When the user opens the home screen, a popup encourages adding the app to the device home screen. On browsers that support it (e.g. Android Chrome), an “Add to Home Screen” button triggers the install prompt automatically; on iOS, short Safari instructions are shown. Dismissal is stored in sessionStorage so the popup doesn’t reappear in the same session. See AddToHomeScreenPopup.jsx, Home.jsx. |
 | — | **Reset app: pull down or tap logo** – User can reset the app (show Landing and go to home) by dragging down on the main content when at the top of the scroll, or by tapping the header logo. ResetContext in App.jsx provides resetApp(); AppLayout uses it for logo button and pull-down gesture (touch and mouse). See App.jsx, AppLayout.jsx. |
 | — | **Auth emails, confirmation flow, welcome screen, password reset** – Confirmation and reset emails are sent by Supabase by default; README explains how to use Custom SMTP so they come from “Kettlebell Mastery”. After registration, user sees “Check your email to confirm” (when email confirmation is required). After confirming the email link, user is sent to a **Welcome** screen (“Welcome to Kettlebell Mastery”) with **Go Pro** or **Do it later** (→ home). Login page has **Forgot password?** → ForgotPasswordPage (enter email, send reset link) → user clicks link → AuthCallback (type=recovery) → **ResetPasswordPage** (set new password) → redirect to Profile with “Your password has been reset” banner. AuthContext: updatePassword; new routes /welcome, /reset-password; WelcomeScreen, ResetPasswordPage. |
 | — | **Profile → login when guest; Home login button; Go Pro on sign-in/register; refresh → home, keep auth** – Tapping Profile in menu/bar: if not logged in, redirects to sign-in (with “Create account” link); if logged in, goes to Profile. Home top card: small “Log in” button for guests. ProBanner: Sign up button removed for guests; “Log in” link instead. Go Pro copy (€3/month, unlock features) moved into SignInPage and RegisterPage. After sign-in/register, redirect uses `returnTo` (e.g. back to Profile). Full page refresh always navigates to home while keeping login (session restored by AuthContext). See ProfileGate, App.jsx, Home.jsx, ProBanner, SignInPage, RegisterPage. |
@@ -96,7 +98,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | File | Role |
 |------|------|
 | `index.html` | Entry HTML; loads `src/main.jsx` |
-| `src/main.jsx` | Mounts React app with `<AuthProvider>` and `<App />` |
+| `src/main.jsx` | Mounts React app with `<AuthProvider>`, `<AdminProvider>`, and `<App />` |
 | `src/App.jsx` | React Router; defines all routes; on full page refresh navigates to home (auth preserved); wraps routes in `<AppLayout />`; renders **Landing** overlay; routes for `/auth/callback`, `/payment/success`, `/payment/cancel`, `/goals` |
 | `src/components/AppLayout.jsx` | Shell: **top header** (fixed, horizontal Kettlebell Mastery logo), full-screen background, `<main>` for content, `BottomNav`, `MenuDrawer` |
 | `src/components/Landing.jsx` | First screen: full-screen overlay with logo, tagline, “Tap screen to continue”; dissolves to Home on tap |
@@ -122,7 +124,8 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | `/schedule` | **Schedule** | Workout/rest days, deload, reminders |
 | `/community` | **Community** | Share with friends + placeholders |
 | `/profile` | **ProfileGate** | If logged in: **Profile** (form, Upgrade to Pro, Manage Subscription, Add to Home Screen, Sign out). If not: redirect to sign-in with returnTo so user returns to Profile after login/register. |
-| `/sign-in` | **SignInPage** | Login form; link to Create account and **Forgot password?** (→ /forgot-password) |
+| `/sign-in` | **SignInPage** | Login form; link to Create account, **Forgot password?**, and Admin |
+| `/admin-login` | **AdminLoginPage** | Admin sign-in (email/password from env); grants full access to all areas |
 | `/register` | **RegisterPage** | Create account; after submit shows “Check your email to confirm” when confirmation is required |
 | `/forgot-password` | **ForgotPasswordPage** | Enter email; send reset link; “Check your email” confirmation |
 | `/library` | **Library** | Exercise library with category filter and expandable cues |
@@ -275,6 +278,7 @@ kettlebell-app/
     │   ├── PageHeader.jsx, PageHeader.module.css
     │   ├── AddToHomeScreen.jsx, AddToHomeScreen.module.css
     │   ├── AddToHomeScreenPopup.jsx, AddToHomeScreenPopup.module.css
+    │   ├── AdminLoginPage.jsx, AdminLoginPage.module.css
     │   ├── Profile.jsx, Profile.module.css
     │   ├── ProfileGate.jsx
     │   ├── RegisterPage.jsx, RegisterPage.module.css
@@ -300,6 +304,9 @@ kettlebell-app/
     │   ├── WeeklyMonthlyStats.jsx, WeeklyMonthlyStats.module.css
     │   ├── WorkoutHistory.jsx, WorkoutHistory.module.css
     │   └── WorkoutLog.jsx, WorkoutLog.module.css
+    ├── contexts/
+    │   ├── AuthContext.jsx
+    │   └── AdminContext.jsx
     ├── data/
     │   └── exercises.js
     ├── lib/
@@ -560,6 +567,8 @@ Only needed for optional Supabase session persistence. Without them, the app run
 |----------|-------------|
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `VITE_ADMIN_EMAIL` | (Optional) Admin login email for `/admin-login` |
+| `VITE_ADMIN_PASSWORD` | (Optional) Admin login password; use with `VITE_ADMIN_EMAIL` |
 
 **Setup:** `cp .env.example .env` then set the two variables. They must be present at **build time** when deploying. See **SETUP.md** and **DEPLOY.md** for details.
 

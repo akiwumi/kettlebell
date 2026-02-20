@@ -4,6 +4,7 @@ import Button from './Button';
 import ProBanner from './payment/ProBanner';
 import AddToHomeScreenPopup from './AddToHomeScreenPopup';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 import { getDisplayName, getPhotoUrl } from '../lib/profileStorage';
 import { getWorkouts } from '../lib/trackingStorage';
 import { getTopInsight } from '../services/aiService';
@@ -27,14 +28,15 @@ function LockBadge() {
 
 export default function Home() {
   const { user, profile, isPro } = useAuth();
+  const { isAdmin } = useAdmin();
   const name = profile?.full_name?.trim() || getDisplayName();
   const photoUrl = profile?.avatar_url || getPhotoUrl();
   const workouts = getWorkouts();
   const recentCount = workouts.slice(0, 5).length;
   const welcome = getWelcomeMessage(name || 'there');
   const topInsight = getTopInsight();
-  // Show lock on Pro features for non-Pro users (logged in or not); home page is open to all
-  const showLock = !isPro;
+  // Show lock on Pro features for non-Pro users (admin has full access)
+  const showLock = !isPro && !isAdmin;
 
   return (
     <Layout className={styles.homeCard}>

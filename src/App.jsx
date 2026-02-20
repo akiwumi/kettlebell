@@ -37,6 +37,7 @@ import SignInPage from './components/SignInPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import WelcomeScreen from './components/WelcomeScreen';
+import AdminLoginPage from './components/AdminLoginPage';
 
 function AppContent() {
   const [landingDismissed, setLandingDismissed] = useState(false);
@@ -79,6 +80,7 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/welcome" element={<WelcomeScreen />} />
+          <Route path="/admin-login" element={<AdminLoginPage />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/data" element={<DataLayout />}>
             <Route index element={<DataHome />} />

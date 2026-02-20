@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
+import { AdminProvider } from './contexts/AdminContext'
 import RootErrorBoundary from './components/RootErrorBoundary'
 
 const rootEl = document.getElementById('root')
@@ -15,7 +16,9 @@ if (!rootEl) {
       <React.StrictMode>
         <RootErrorBoundary>
           <AuthProvider>
-            <App />
+            <AdminProvider>
+              <App />
+            </AdminProvider>
           </AuthProvider>
         </RootErrorBoundary>
       </React.StrictMode>

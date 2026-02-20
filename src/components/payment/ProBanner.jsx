@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAdmin } from '../../contexts/AdminContext';
 import { createCheckoutSession } from '../../lib/stripeClient';
 import Button from '../Button';
 import styles from './ProBanner.module.css';
 
 export default function ProBanner() {
   const { user, isPro, loading } = useAuth();
+  const { isAdmin } = useAdmin();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  if (loading || isPro) return null;
+  if (loading || isPro || isAdmin) return null;
 
   const handleUpgrade = () => {
     if (user) {
