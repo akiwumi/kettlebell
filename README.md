@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Profile → login when guest; Home login button; Go Pro on sign-in/register; refresh → home, keep auth** – Tapping Profile in menu/bar: if not logged in, redirects to sign-in (with “Create account” link); if logged in, goes to Profile. Home top card: small “Log in” button for guests. ProBanner: Sign up button removed for guests; “Log in” link instead. Go Pro copy (€3/month, unlock features) moved into SignInPage and RegisterPage. After sign-in/register, redirect uses `returnTo` (e.g. back to Profile). Full page refresh always navigates to home while keeping login (session restored by AuthContext). See ProfileGate, App.jsx, Home.jsx, ProBanner, SignInPage, RegisterPage. |
+| Latest | **Auth emails, confirmation flow, welcome screen, password reset** – Confirmation and reset emails are sent by Supabase by default; README explains how to use Custom SMTP so they come from “Kettlebell Mastery”. After registration, user sees “Check your email to confirm” (when email confirmation is required). After confirming the email link, user is sent to a **Welcome** screen (“Welcome to Kettlebell Mastery”) with **Go Pro** or **Do it later** (→ home). Login page has **Forgot password?** → ForgotPasswordPage (enter email, send reset link) → user clicks link → AuthCallback (type=recovery) → **ResetPasswordPage** (set new password) → redirect to Profile with “Your password has been reset” banner. AuthContext: updatePassword; new routes /welcome, /reset-password; WelcomeScreen, ResetPasswordPage. |
+| — | **Profile → login when guest; Home login button; Go Pro on sign-in/register; refresh → home, keep auth** – Tapping Profile in menu/bar: if not logged in, redirects to sign-in (with “Create account” link); if logged in, goes to Profile. Home top card: small “Log in” button for guests. ProBanner: Sign up button removed for guests; “Log in” link instead. Go Pro copy (€3/month, unlock features) moved into SignInPage and RegisterPage. After sign-in/register, redirect uses `returnTo` (e.g. back to Profile). Full page refresh always navigates to home while keeping login (session restored by AuthContext). See ProfileGate, App.jsx, Home.jsx, ProBanner, SignInPage, RegisterPage. |
 | — | **Register = free account only; Pro opt-in from Profile; Add to Home Screen** – After registration users go to Home (no automatic Pro/checkout). Pro upgrade only via Profile: dedicated "Upgrade to Pro" button (Stripe). ProBanner/ProGate: guests see "Sign up" (no checkout redirect); copy clarifies upgrade from Profile. PWA: `public/manifest.json`, theme-color and apple-mobile-web-app meta, `AddToHomeScreen` in Profile with iOS/Android instructions and optional Install button. See RegisterPage, ProBanner, ProGate, Profile, AddToHomeScreen, index.html. |
 | — | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
 | — | **Unilateral exercises: swap sides** – Exercises with `isUnilateral: true` run twice (Side 1, then Side 2). When Side 1 timer hits zero, coach says "And now, swap sides", swap overlay (⇄) shows 1.5s, then timer resets to original duration for Side 2. UI shows "Side 1 of 2" / "Side 2 of 2". See `src/data/exercises.js` (isUnilateral), `Session.jsx` (phase 'swap', currentSide), `coachVoice.js` (speakSwapSides), swap-sides-feature-spec.md. |
@@ -103,7 +104,9 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | **Home** | Dashboard: welcome, “Log in” in top card (guests), Pro banner (free users; “Log in” link for guests, “Upgrade now” for logged-in), cards with lock badges (Pro), “Choose routine” button |
-| `/auth/callback` | **AuthCallback** | Email verification / password reset redirect handler |
+| `/auth/callback` | **AuthCallback** | Handles email verification and password-reset link: type=recovery → /reset-password; else → /welcome (or home) |
+| `/welcome` | **WelcomeScreen** | After email confirmation: “Welcome to Kettlebell Mastery”, Go Pro or Do it later → home |
+| `/reset-password` | **ResetPasswordPage** | Set new password after following reset link; then redirect to Profile with success message |
 | `/payment/success` | **PaymentSuccess** | Post-Stripe checkout success; confirms Pro access |
 | `/payment/cancel` | **PaymentCancel** | User canceled checkout |
 | `/goals` | **Goals** | Goal setting and tracking (Pro) |
@@ -117,6 +120,9 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | `/schedule` | **Schedule** | Workout/rest days, deload, reminders |
 | `/community` | **Community** | Share with friends + placeholders |
 | `/profile` | **ProfileGate** | If logged in: **Profile** (form, Upgrade to Pro, Manage Subscription, Add to Home Screen, Sign out). If not: redirect to sign-in with returnTo so user returns to Profile after login/register. |
+| `/sign-in` | **SignInPage** | Login form; link to Create account and **Forgot password?** (→ /forgot-password) |
+| `/register` | **RegisterPage** | Create account; after submit shows “Check your email to confirm” when confirmation is required |
+| `/forgot-password` | **ForgotPasswordPage** | Enter email; send reset link; “Check your email” confirmation |
 | `/library` | **Library** | Exercise library with category filter and expandable cues |
 | `/data` | **DataLayout** + **DataHome** | Data shell; overview cards (ProGate) to sub-pages |
 | `/data/workouts` | **WorkoutLog** | Log a workout: date, duration, exercises, RPE, energy, skipped, PRs |
@@ -267,6 +273,11 @@ kettlebell-app/
     │   ├── AddToHomeScreen.jsx, AddToHomeScreen.module.css
     │   ├── Profile.jsx, Profile.module.css
     │   ├── ProfileGate.jsx
+    │   ├── RegisterPage.jsx, RegisterPage.module.css
+    │   ├── ResetPasswordPage.jsx, ResetPasswordPage.module.css
+    │   ├── SignInPage.jsx, SignInPage.module.css
+    │   ├── WelcomeScreen.jsx, WelcomeScreen.module.css
+    │   ├── ForgotPasswordPage.jsx, ForgotPasswordPage.module.css
     │   ├── Progress.jsx, Progress.module.css
     │   ├── RoutinePage.jsx, RoutinePage.module.css
     │   ├── Schedule.jsx, Schedule.module.css
@@ -547,6 +558,17 @@ Only needed for optional Supabase session persistence. Without them, the app run
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
 
 **Setup:** `cp .env.example .env` then set the two variables. They must be present at **build time** when deploying. See **SETUP.md** and **DEPLOY.md** for details.
+
+### Why confirmation and reset emails come from Supabase
+
+By default, Supabase sends auth emails (signup confirmation, password reset) from its own mail service, so the “from” address and sender name are Supabase’s, not yours.
+
+To send these emails **from “Kettlebell Mastery”** (or your own domain):
+
+1. In the [Supabase Dashboard](https://supabase.com/dashboard) go to **Project → Authentication → Email Templates** (or **Settings → Auth**).
+2. Enable **Custom SMTP** and enter your SMTP provider details (e.g. SendGrid, Resend, AWS SES). In the SMTP settings you can set the **sender address** and **sender name** (e.g. `Kettlebell Mastery <noreply@yourdomain.com>`).
+
+Until Custom SMTP is configured, users will see confirmation and password-reset emails from Supabase.
 
 ---
 

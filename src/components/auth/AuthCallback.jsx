@@ -7,6 +7,8 @@ import styles from './AuthCallback.module.css';
 /**
  * Handles redirect from email verification or password reset link.
  * Route: /auth/callback
+ * - type=recovery (from hash or query) → redirect to /reset-password to set new password
+ * - email confirmation → redirect to /welcome (Go Pro / Do it later)
  */
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -16,19 +18,23 @@ export default function AuthCallback() {
   useEffect(() => {
     if (loading) return;
     const params = new URLSearchParams(window.location.search);
-    const type = params.get('type');
+    const hashParams = new URLSearchParams((window.location.hash || '').slice(1));
+    const type = params.get('type') || hashParams.get('type');
+
     if (type === 'recovery') {
-      setStatus('You can set a new password in the next step.');
-      navigate('/profile', { replace: true });
+      setStatus('Taking you to set a new password…');
+      navigate('/reset-password', { replace: true });
       return;
     }
+
     if (session?.user) {
-      setStatus('Verification successful. Redirecting…');
-      navigate('/', { replace: true });
-    } else {
-      setStatus('Something went wrong. Redirecting to home…');
-      setTimeout(() => navigate('/', { replace: true }), 2000);
+      setStatus('Welcome! Redirecting…');
+      navigate('/welcome', { replace: true });
+      return;
     }
+
+    setStatus('Something went wrong. Redirecting to home…');
+    setTimeout(() => navigate('/', { replace: true }), 2000);
   }, [loading, session, navigate]);
 
   return (

@@ -61,6 +61,7 @@ export default function RegisterPage() {
   const [photoUrl, setPhotoUrl] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handlePhotoChange = async (e) => {
     const f = e.target.files?.[0];
@@ -100,8 +101,33 @@ export default function RegisterPage() {
       setError('An account with this email already exists. Sign in instead.');
       return;
     }
+    // Email confirmation required: Supabase returns user but no session
+    if (data?.user && !data.session) {
+      setEmailSent(true);
+      return;
+    }
     navigate(returnTo, { replace: true });
   };
+
+  if (emailSent) {
+    return (
+      <Layout>
+        <div className={styles.page}>
+          <BackLink />
+          <PageHeader title="Check your email" />
+          <div className={styles.emailSent} role="status">
+            <p className={styles.emailSentText}>
+              We’ve sent a confirmation link to <strong>{email}</strong>. Please check your inbox and click the link to confirm your registration.
+            </p>
+            <p className={styles.emailSentHint}>
+              You can close this page and sign in once you’ve confirmed.
+            </p>
+          </div>
+          <Link to="/sign-in" className={styles.emailSentLink}>Go to sign in</Link>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

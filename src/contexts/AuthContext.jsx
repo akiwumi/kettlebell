@@ -125,6 +125,11 @@ export function AuthProvider({ children }) {
     });
   }
 
+  async function updatePassword(newPassword) {
+    if (!supabase || !user?.id) return { error: { message: 'Not authenticated' } };
+    return supabase.auth.updateUser({ password: newPassword });
+  }
+
   async function updateProfile(data) {
     if (!supabase || !user?.id) return { error: { message: 'Not authenticated' } };
     const payload = { ...data, updated_at: new Date().toISOString() };
@@ -152,6 +157,7 @@ export function AuthProvider({ children }) {
     signIn,
     signOut,
     resetPassword,
+    updatePassword,
     updateProfile,
     refreshSubscriptionStatus: () => user?.id && refreshSubscriptionStatus(user.id),
   };

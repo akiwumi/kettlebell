@@ -134,3 +134,33 @@
   color: var(--text-secondary);
   line-height: 1.35;
 }
+
+.emailSent {
+  margin-bottom: 1rem;
+}
+
+.emailSentText {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.emailSentHint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.emailSentLink {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-indigo);
+  text-decoration: none;
+}
+
+.emailSentLink:hover {
+  text-decoration: underline;
+}

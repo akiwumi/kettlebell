@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import PageHeader from './PageHeader';
 import Button from './Button';
@@ -103,8 +104,12 @@ function saveProfile(data) {
 }
 
 export default function Profile() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user, profile: authProfile, signOut, updateProfile, isPro } = useAuth();
   const [profile, setProfile] = useState(loadProfile);
+  const [dismissedPasswordReset, setDismissedPasswordReset] = useState(false);
+  const passwordReset = location.state?.passwordReset && !dismissedPasswordReset;
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -147,9 +152,23 @@ export default function Profile() {
     });
   };
 
+  const dismissPasswordReset = () => {
+    setDismissedPasswordReset(true);
+    navigate('/profile', { replace: true, state: {} });
+  };
+
   return (
     <Layout>
       <PageHeader title="User Profile Setup" subtitle="Your details and preferences" />
+
+      {passwordReset && (
+        <div className={styles.passwordResetBanner} role="status">
+          <p className={styles.passwordResetText}>Your password has been reset. You can use the app as normal.</p>
+          <button type="button" onClick={dismissPasswordReset} className={styles.passwordResetDismiss} aria-label="Dismiss">
+            ×
+          </button>
+        </div>
+      )}
 
       <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
         {/* Session audio – visible at top so users can find coach/audio settings */}

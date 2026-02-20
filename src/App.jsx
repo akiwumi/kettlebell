@@ -28,6 +28,8 @@ import Goals from './components/Goals';
 import RegisterPage from './components/RegisterPage';
 import SignInPage from './components/SignInPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
+import ResetPasswordPage from './components/ResetPasswordPage';
+import WelcomeScreen from './components/WelcomeScreen';
 
 function AppContent() {
   const [landingDismissed, setLandingDismissed] = useState(false);
@@ -63,6 +65,8 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/sign-in" element={<SignInPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/welcome" element={<WelcomeScreen />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/data" element={<DataLayout />}>
             <Route index element={<DataHome />} />
