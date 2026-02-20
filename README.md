@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Unilateral exercises: swap sides** – Exercises with `isUnilateral: true` run twice (Side 1, then Side 2). When Side 1 timer hits zero, coach says "And now, swap sides", swap overlay (⇄) shows 1.5s, then timer resets to original duration for Side 2. UI shows "Side 1 of 2" / "Side 2 of 2". See `src/data/exercises.js` (isUnilateral), `Session.jsx` (phase 'swap', currentSide), `coachVoice.js` (speakSwapSides), swap-sides-feature-spec.md. |
+| Latest | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
+| — | **Unilateral exercises: swap sides** – Exercises with `isUnilateral: true` run twice (Side 1, then Side 2). When Side 1 timer hits zero, coach says "And now, swap sides", swap overlay (⇄) shows 1.5s, then timer resets to original duration for Side 2. UI shows "Side 1 of 2" / "Side 2 of 2". See `src/data/exercises.js` (isUnilateral), `Session.jsx` (phase 'swap', currentSide), `coachVoice.js` (speakSwapSides), swap-sides-feature-spec.md. |
 | — | **Coach: longer tone, 10s intro, first exercise, random encouragement** – Longer start-of-exercise tone (500ms) at each exercise. Coach counts down from 10 at the start of every exercise ("Get set" 10…1), then work timer runs. First exercise of the session is announced (random session-start phrase). Random encouragement for "Go!" and mid-work (halfway through each exercise). Last 10 seconds of work counted in sync with timer. See `coachVoice.js` (playStartOfExerciseTone, START_PHRASES, MID_WORK_PHRASES, SESSION_START_PHRASES), `Session.jsx` (workIntroLeft, TimerDisplay phaseLabelOverride). |
 | — | **Coach voice in sync** – Countdown numbers (10…1) use synthesis only so they stay in sync with the timer. "Next up, [exercise]" is announced at 6s left in work so it plays during the 10s rest; skipped on final exercise. See `coachVoice.js` (speakCountdownNumber), `Session.jsx` (nextExerciseAnnouncedRef, timeLeft 6). |
 | — | **Vercel coach voice + Get Ready beep** – Coach TTS on Vercel: Edge API at `api/tts/stream.js`; set `OPENAI_API_KEY` in Vercel project env and redeploy. App always tries same-origin `/api/tts/stream` (dev + Vercel); falls back to synthetic on failure. Get Ready 10s countdown plays a start beep and coach phrase. See fix-vercel-audio.md, `coachVoice.js` (TTS_AVAILABLE), `GetReady.jsx` (playCountdownBeep). |
@@ -77,7 +78,7 @@ npm run build    # Production build → dist/
 npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 ```
 
-- **Optional:** Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for session history (see [Environment variables](#environment-variables)). Run `supabase-schema.sql` in Supabase SQL Editor if using Supabase.
+- **Optional:** Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for session history (see [Environment variables](#environment-variables)). Run `supabase-schema-from-guide.sql` in Supabase SQL Editor if using Supabase (see SUPABASE_SETUP_GUIDE.md A2).
 - **Optional – real coach voice (OpenAI TTS):** **Local:** In a second terminal run `cd tts-server && npm run dev` and add `OPENAI_API_KEY=sk-...` to `tts-server/.env`. Vite proxies `/api` to the TTS server. **Vercel:** Add `OPENAI_API_KEY` in Vercel → Project → Settings → Environment Variables, then redeploy; the app uses the built-in Edge route `api/tts/stream.js`. On other static hosts (e.g. Netlify) the app tries `/api/tts/stream` and falls back to browser voice if unavailable. See [fix-vercel-audio.md](fix-vercel-audio.md), [OPENAI_TTS_README.md](OPENAI_TTS_README.md).
 - **Full steps and troubleshooting:** [SETUP.md](SETUP.md).
 
@@ -214,6 +215,12 @@ kettlebell-app/
 ├── AUDIO_TESTING.md
 ├── EXERCISE.md
 ├── supabase-schema.sql
+├── supabase-schema-from-guide.sql   # canonical schema (SUPABASE_SETUP_GUIDE.md); run in SQL Editor or via db push
+├── supabase/
+│   ├── config.toml
+│   ├── migrations/
+│   │   └── 20250220000000_kettlebell_gym_full_schema.sql
+│   └── functions/
 ├── .env.example
 ├── package.json
 ├── vite.config.js
@@ -505,7 +512,7 @@ Use these exact IDs as filenames (no extension in the ID):
 
 - **Client** – `src/lib/supabase.js` (only when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set).
 - **Session service** – `src/services/sessionService.js`: `saveSession()`, `getRecentSessions()`.
-- **Schema** – `supabase-schema.sql`: table `workout_sessions`. RLS allows anonymous insert/select.
+- **Schema** – `supabase-schema-from-guide.sql` (and `supabase/migrations/`): full schema from SUPABASE_SETUP_GUIDE.md (profiles, subscriptions, workout_sessions, workout_history, body_metrics, personal_records, user_routines, schedules, user_goals). RLS on all tables.
 
 ---
 
