@@ -196,6 +196,11 @@
   accent-color: var(--accent-orange);
 }
 
+.proCta {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
 .signOutWrap {
   margin-top: 1.5rem;
   padding-top: 1rem;

@@ -18,7 +18,7 @@ export default function ProBanner() {
       createCheckoutSession(user.email).catch(() => setCheckoutLoading(false));
       return;
     }
-    navigate('/register', { state: { afterRegister: 'checkout' } });
+    navigate('/register');
   };
 
   return (
@@ -28,19 +28,19 @@ export default function ProBanner() {
           <h2 className={styles.title}>
             {user
               ? 'Unlock all features — €3/month'
-              : 'Sign up & go Pro — €3/month'}
+              : 'Sign up for free — upgrade to Pro anytime'}
           </h2>
           <p className={styles.desc}>
             {user
               ? 'Workout plans, full analytics, AI assistant, custom routines & more.'
-              : 'Create an account, then you’ll be taken to payment. Full access after that.'}
+              : 'Create an account to save progress. Upgrade to Pro from Profile when you’re ready.'}
           </p>
           <Button
             onClick={handleUpgrade}
             disabled={checkoutLoading}
             className={styles.cta}
           >
-            {checkoutLoading ? 'Redirecting…' : user ? 'Upgrade now' : 'Sign up & go Pro'}
+            {checkoutLoading ? 'Redirecting…' : user ? 'Upgrade now' : 'Sign up'}
           </Button>
         </div>
       </section>

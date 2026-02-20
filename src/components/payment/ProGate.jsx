@@ -19,7 +19,7 @@ export default function ProGate({ feature, title, description, children }) {
     return children;
   }
 
-  const handleSignUpFirst = () => navigate('/register', { state: { afterRegister: 'checkout' } });
+  const handleSignUpFirst = () => navigate('/register');
 
   return (
     <div className={styles.wrapper}>

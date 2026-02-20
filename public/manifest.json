@@ -1,0 +1,24 @@
+{
+  "name": "Kettlebell Gym",
+  "short_name": "Kettlebell Gym",
+  "description": "Your pocket coach for kettlebell routines, timers, and progress.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/exercise-media/images/logos/kettlebell_logo_icon_col.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/exercise-media/images/logos/kettlebell_logo_icon_col.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

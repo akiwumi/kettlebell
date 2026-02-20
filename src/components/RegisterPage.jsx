@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import BackLink from './BackLink';
 import PageHeader from './PageHeader';
 import Button from './Button';
 import { useAuth } from '../contexts/AuthContext';
-import { createCheckoutSession } from '../lib/stripeClient';
 import styles from './RegisterPage.module.css';
 
 const MAX_PHOTO_BYTES = 350000;
@@ -50,9 +49,8 @@ function compressDataUrl(dataUrl) {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { signUp } = useAuth();
-  const goToCheckoutAfter = location.state?.afterRegister === 'checkout';
+  // After registration we always go to Home; Pro upgrade is opt-in from Profile.
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -100,11 +98,6 @@ export default function RegisterPage() {
       setError('An account with this email already exists. Sign in instead.');
       return;
     }
-    const userEmail = data?.user?.email || email.trim();
-    if (goToCheckoutAfter && userEmail) {
-      createCheckoutSession(userEmail).catch(() => setError('Could not start checkout.'));
-      return;
-    }
     navigate('/', { replace: true });
   };
 
@@ -114,7 +107,7 @@ export default function RegisterPage() {
         <BackLink />
         <PageHeader
           title="Create account"
-          subtitle={goToCheckoutAfter ? 'Sign up, then you’ll go to payment for Pro access.' : 'Sign up to save progress and unlock Pro features.'}
+          subtitle="Sign up to save progress. You can upgrade to Pro anytime from Profile."
         />
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.photoWrap}>

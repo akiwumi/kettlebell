@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
+| Latest | **Register = free account only; Pro opt-in from Profile; Add to Home Screen** – After registration users go to Home (no automatic Pro/checkout). Pro upgrade only via Profile: dedicated "Upgrade to Pro" button (Stripe). ProBanner/ProGate: guests see "Sign up" (no checkout redirect); copy clarifies upgrade from Profile. PWA: `public/manifest.json`, theme-color and apple-mobile-web-app meta, `AddToHomeScreen` in Profile with iOS/Android instructions and optional Install button. See RegisterPage, ProBanner, ProGate, Profile, AddToHomeScreen, index.html. |
+| — | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
 | — | **Unilateral exercises: swap sides** – Exercises with `isUnilateral: true` run twice (Side 1, then Side 2). When Side 1 timer hits zero, coach says "And now, swap sides", swap overlay (⇄) shows 1.5s, then timer resets to original duration for Side 2. UI shows "Side 1 of 2" / "Side 2 of 2". See `src/data/exercises.js` (isUnilateral), `Session.jsx` (phase 'swap', currentSide), `coachVoice.js` (speakSwapSides), swap-sides-feature-spec.md. |
 | — | **Coach: longer tone, 10s intro, first exercise, random encouragement** – Longer start-of-exercise tone (500ms) at each exercise. Coach counts down from 10 at the start of every exercise ("Get set" 10…1), then work timer runs. First exercise of the session is announced (random session-start phrase). Random encouragement for "Go!" and mid-work (halfway through each exercise). Last 10 seconds of work counted in sync with timer. See `coachVoice.js` (playStartOfExerciseTone, START_PHRASES, MID_WORK_PHRASES, SESSION_START_PHRASES), `Session.jsx` (workIntroLeft, TimerDisplay phaseLabelOverride). |
 | — | **Coach voice in sync** – Countdown numbers (10…1) use synthesis only so they stay in sync with the timer. "Next up, [exercise]" is announced at 6s left in work so it plays during the 10s rest; skipped on final exercise. See `coachVoice.js` (speakCountdownNumber), `Session.jsx` (nextExerciseAnnouncedRef, timeLeft 6). |
@@ -114,7 +115,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 | `/progress` | **Progress** | Charts: weight, measurements, volume, heat map, strength, goals (ProGate) |
 | `/schedule` | **Schedule** | Workout/rest days, deload, reminders |
 | `/community` | **Community** | Share with friends + placeholders |
-| `/profile` | **Profile** | Profile form; Manage Subscription (Pro); Sign out when logged in |
+| `/profile` | **Profile** | Profile form; Upgrade to Pro (Stripe) for non-Pro users; Manage Subscription for Pro; Add to Home Screen instructions; Sign out when logged in |
 | `/library` | **Library** | Exercise library with category filter and expandable cues |
 | `/data` | **DataLayout** + **DataHome** | Data shell; overview cards (ProGate) to sub-pages |
 | `/data/workouts` | **WorkoutLog** | Log a workout: date, duration, exercises, RPE, energy, skipped, PRs |
@@ -226,6 +227,7 @@ kettlebell-app/
 ├── vite.config.js
 ├── index.html
 ├── public/
+│   ├── manifest.json
 │   ├── exercise-media/
 │   │   ├── README.md
 │   │   ├── images/
@@ -260,6 +262,7 @@ kettlebell-app/
     │   ├── Library.jsx, Library.module.css
     │   ├── MenuDrawer.jsx, MenuDrawer.module.css
     │   ├── PageHeader.jsx, PageHeader.module.css
+    │   ├── AddToHomeScreen.jsx, AddToHomeScreen.module.css
     │   ├── Profile.jsx, Profile.module.css
     │   ├── Progress.jsx, Progress.module.css
     │   ├── RoutinePage.jsx, RoutinePage.module.css
@@ -386,6 +389,8 @@ kettlebell-app/
 
 ### Profile
 
+- **Upgrade to Pro** – Logged-in free users see a "Pro subscription" section with an "Upgrade to Pro" button (Stripe checkout). Pro users see "Manage subscription" instead.
+- **Add to Home Screen** – Instructions to add the app icon to the phone home screen (iOS: Share → Add to Home Screen; Android: menu → Add to Home screen), plus optional "Install app" button when the browser supports it.
 - **Basic info** – Name, age, gender, photo, weight, height, target weight, body measurements, fitness level, experience, injuries.
 - **Coach voice** – Off / Female / Male. Default **Female** (coach on). When on, encouraging phrases during Get-ready, Session (Start, countdown 3-2-1, next exercise, complete); beep in last 10s of “Next in”.
 - **Edit photo** – Button to upload a profile picture; image stored as base64 in profile (compressed if needed) so it persists. With a backend, photos can be stored under `public/registration/profile-photos/`.

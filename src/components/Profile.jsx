@@ -5,6 +5,8 @@ import Button from './Button';
 import ManageSubscription from './payment/ManageSubscription';
 import ProGate from './payment/ProGate';
 import { useAuth } from '../contexts/AuthContext';
+import { createCheckoutSession } from '../lib/stripeClient';
+import AddToHomeScreen from './AddToHomeScreen';
 import styles from './Profile.module.css';
 
 const MAX_PHOTO_BYTES = 350000; // ~350KB to stay under localStorage limits
@@ -101,8 +103,9 @@ function saveProfile(data) {
 }
 
 export default function Profile() {
-  const { user, profile: authProfile, signOut, updateProfile } = useAuth();
+  const { user, profile: authProfile, signOut, updateProfile, isPro } = useAuth();
   const [profile, setProfile] = useState(loadProfile);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -462,7 +465,33 @@ export default function Profile() {
 
         <Button type="submit">Save profile</Button>
 
+        {user && !isPro && (
+          <section className={styles.section} aria-label="Upgrade to Pro">
+            <h2 className={styles.sectionTitle}>Pro subscription</h2>
+            <p className={styles.audioDescription}>
+              Unlock full analytics, AI assistant, custom routines, goals, and more with a Pro subscription (€3/month).
+            </p>
+            <Button
+              type="button"
+              className={styles.proCta}
+              disabled={checkoutLoading}
+              onClick={async () => {
+                setCheckoutLoading(true);
+                try {
+                  await createCheckoutSession(user.email);
+                } catch (_) {
+                  setCheckoutLoading(false);
+                }
+              }}
+            >
+              {checkoutLoading ? 'Redirecting…' : 'Upgrade to Pro'}
+            </Button>
+          </section>
+        )}
+
         <ManageSubscription />
+
+        <AddToHomeScreen />
 
         {user && (
           <div className={styles.signOutWrap}>
