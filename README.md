@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Full refresh stays on current page** – Removed redirect to home on full page reload; you stay on the same URL and auth is still restored. See App.jsx. |
+| Latest | **Fix overflow on all pages** – Global and layout overflow fixes: html/body/#root overflow-x hidden; main content and Layout card use min-width: 0 and overflow-x: hidden so content doesn’t spill. See index.css, AppLayout.module.css, Layout.module.css. |
+| — | **Full refresh stays on current page** – Removed redirect to home on full page reload; you stay on the same URL and auth is still restored. See App.jsx. |
 | — | **Home: Log out button** – When the user is signed in, the top card shows a "Log out" button in place of "Log in"; tap to sign out. See Home.jsx. |
 | — | **PWA portrait lock** – Home-screen PWA is locked to portrait: manifest `orientation: portrait` and runtime Screen Orientation API when supported (e.g. Android). See public/manifest.json, App.jsx. |
 | — | **Log out in menu** – Hamburger menu shows a "Log out" button at the bottom when the user is signed in; tap to sign out, close the menu, and return to home. See MenuDrawer.jsx. |
