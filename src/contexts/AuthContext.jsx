@@ -99,14 +99,26 @@ export function AuthProvider({ children }) {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (!error && data?.user) await loadProfile(data.user.id);
+    if (error) return { data, error };
+    if (data?.session && data?.user) {
+      setSession(data.session);
+      setUser(data.user);
+      await loadProfile(data.user.id);
+    } else if (data?.user) {
+      await loadProfile(data.user.id);
+    }
     return { data, error };
   }
 
   async function signIn(email, password) {
     if (!supabase) return { data: null, error: { message: 'Supabase not configured' } };
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error && data?.user) await loadProfile(data.user.id);
+    if (error) return { data, error };
+    if (data?.session && data?.user) {
+      setSession(data.session);
+      setUser(data.user);
+      await loadProfile(data.user.id);
+    }
     return { data, error };
   }
 

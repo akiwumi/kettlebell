@@ -1,0 +1,6 @@
+.loading {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}

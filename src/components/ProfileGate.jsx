@@ -1,6 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Layout from './Layout';
 import Profile from './Profile';
+import styles from './ProfileGate.module.css';
 
 /**
  * Renders Profile when the user is logged in.
@@ -8,7 +10,13 @@ import Profile from './Profile';
  */
 export default function ProfileGate() {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) {
+    return (
+      <Layout>
+        <div className={styles.loading}>Loading…</div>
+      </Layout>
+    );
+  }
   if (user) return <Profile />;
   return <Navigate to="/sign-in" state={{ returnTo: '/profile' }} replace />;
 }
