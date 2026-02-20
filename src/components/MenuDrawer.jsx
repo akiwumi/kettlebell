@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { KETTLEBELL_ICON_URL } from '../lib/constants';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './MenuDrawer.module.css';
 
 const menuSections = [
@@ -74,6 +75,7 @@ const menuSections = [
 export default function MenuDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const handleNav = (to) => {
     if (location.pathname !== to) {
@@ -85,6 +87,12 @@ export default function MenuDrawer({ open, onClose }) {
   const isActive = (to) => {
     if (to === '/') return location.pathname === '/';
     return location.pathname === to || location.pathname.startsWith(to + '/');
+  };
+
+  const handleLogout = () => {
+    signOut();
+    onClose();
+    navigate('/', { replace: true });
   };
 
   return (
@@ -135,6 +143,17 @@ export default function MenuDrawer({ open, onClose }) {
             </div>
           ))}
         </div>
+        {user && (
+          <div className={styles.footer}>
+            <button
+              type="button"
+              className={styles.logoutBtn}
+              onClick={handleLogout}
+            >
+              Log out
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

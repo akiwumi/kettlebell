@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **PWA sign-in: no client timeout** – Sign-in no longer uses a client-side timeout (was causing PWA to time out). Standalone detection broadened (standalone, fullscreen, minimal-ui, navigator.standalone). Sign-in page shows “Open in browser to sign in” when running as PWA. See SignInPage.jsx. |
+| Latest | **Log out in menu** – Hamburger menu shows a "Log out" button at the bottom when the user is signed in; tap to sign out, close the menu, and return to home. See MenuDrawer.jsx. |
+| — | **PWA sign-in: no client timeout** – Sign-in no longer uses a client-side timeout (was causing PWA to time out). Standalone detection broadened (standalone, fullscreen, minimal-ui, navigator.standalone). Sign-in page shows “Open in browser to sign in” when running as PWA. See SignInPage.jsx. |
 | — | **Admin login** – Optional admin access via env `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`. Sign in at `/admin-login` (link on sign-in page) to get full access to all app areas (Pro gates bypassed). Admin state stored in sessionStorage; "End admin session" in Profile. AdminContext, AdminLoginPage, ProGate/Home/ProBanner/Profile/WelcomeScreen respect `isAdmin`. |
 | — | **Pull-down reset on all pages; 404 on reload** – Pull-down-to-reset now uses the scrollable container under the pointer (Layout card or main content), so it works on every page. vercel.json rewrites all routes to index.html; added public/_redirects for Netlify/other hosts. Redeploy after pull to apply 404 fix. |
 | — | **Add to Home Screen popup on Home** – When the user opens the home screen, a popup encourages adding the app to the device home screen. On browsers that support it (e.g. Android Chrome), an “Add to Home Screen” button triggers the install prompt automatically; on iOS, short Safari instructions are shown. Dismissal is stored in sessionStorage so the popup doesn’t reappear in the same session. See AddToHomeScreenPopup.jsx, Home.jsx. |
@@ -143,7 +144,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 |-----------|---------|
 | **AppLayout** | Wrapper: fixed top header with **tappable logo** (reset app), background, main content (pull-down at top to reset), BottomNav, MenuDrawer |
 | **BottomNav** | Fixed bottom bar: Home, Profile, Data, Exercises, Menu (hamburger); Profile goes to /profile (login if guest via ProfileGate) |
-| **MenuDrawer** | Slide-up drawer from Menu: links to all sections (Main, Progress, Data, Schedule, Community, Profile, Exercises); Profile → /profile (login if guest) |
+| **MenuDrawer** | Slide-up drawer from Menu: links to all sections (Main, Progress, Data, Schedule, Community, Profile, Exercises); Profile → /profile (login if guest); Log out at bottom when signed in |
 | **ProfileGate** | Wraps /profile route: if logged in renders Profile; if not, redirects to sign-in with returnTo so user returns to Profile after login/register |
 | **Landing** | First screen on open: logo, tagline, “Tap screen to continue”; white full-screen overlay; dissolve to Home on tap |
 | **Layout** | Page wrapper: max-width, glass panel, centred content; `fillViewport` (default true) fits card between header and nav with scroll inside card; Library uses `fillViewport={false}` |
@@ -432,7 +433,7 @@ kettlebell-app/
 ### Navigation
 
 - **Bottom nav** – Home, Profile, Data, Exercises, **Menu** (hamburger).
-- **Menu drawer** – Sections: Main (Home, Choose routine, Dashboard, Start session), Progress & charts, Summary dashboard, Data & tracking (includes Workout history), Schedule & reminders, Community & more (Profile, Exercises). Tap a link to navigate and close the drawer.
+- **Menu drawer** – Sections: Main (Home, Choose routine, Dashboard, Start session), Progress & charts, Summary dashboard, Data & tracking (includes Workout history), Schedule & reminders, Community & more (Profile, Exercises). Tap a link to navigate and close the drawer. When signed in, **Log out** appears at the bottom; tap to sign out and return to home.
 
 ---
 
