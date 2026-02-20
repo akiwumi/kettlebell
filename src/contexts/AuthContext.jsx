@@ -12,6 +12,16 @@ export function AuthProvider({ children }) {
 
   const isEmailVerified = !!user?.email_confirmed_at;
 
+  /** Map DB profile (display_name, photo_url) to app shape (full_name, avatar_url). */
+  function mapProfileFromDb(data) {
+    if (!data) return null;
+    return {
+      ...data,
+      full_name: data.full_name ?? data.display_name,
+      avatar_url: data.avatar_url ?? data.photo_url,
+    };
+  }
+
   async function loadProfile(userId) {
     if (!supabase || !userId) {
       setProfile(null);
@@ -22,7 +32,7 @@ export function AuthProvider({ children }) {
       .select('*')
       .eq('id', userId)
       .single();
-    setProfile(data || null);
+    setProfile(mapProfileFromDb(data) || null);
     setIsPro(!!data?.is_pro);
   }
 
@@ -41,9 +51,7 @@ export function AuthProvider({ children }) {
       .maybeSingle();
     const active = data?.status === 'active' || data?.status === 'trialing';
     setIsPro(active);
-    if (profile) {
-      setProfile((p) => (p ? { ...p, is_pro: active } : null));
-    }
+    setProfile((p) => (p ? { ...p, is_pro: active } : null));
   }
 
   useEffect(() => {
@@ -119,13 +127,16 @@ export function AuthProvider({ children }) {
 
   async function updateProfile(data) {
     if (!supabase || !user?.id) return { error: { message: 'Not authenticated' } };
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        ...data,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+    const payload = { ...data, updated_at: new Date().toISOString() };
+    if ('full_name' in payload) {
+      payload.display_name = payload.full_name;
+      delete payload.full_name;
+    }
+    if ('avatar_url' in payload) {
+      payload.photo_url = payload.avatar_url;
+      delete payload.avatar_url;
+    }
+    const { error } = await supabase.from('profiles').update(payload).eq('id', user.id);
     if (!error) await loadProfile(user.id);
     return { error };
   }

@@ -63,7 +63,7 @@ Full feature list and component overview for the Kettlebell Gym app.
 
 ### Supabase (optional)
 
-- **Client** – `src/lib/supabase.js`. Creates the Supabase client only if `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set; otherwise the app runs without a backend.
+- **Client** – `src/lib/supabaseClient.js`. Creates the Supabase client only if `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set; otherwise the app runs without a backend.
 - **Session service** – `src/services/sessionService.js`: `saveSession()`, `getRecentSessions()`. Used to persist completed sessions and, in the future, to display history.
 - **Schema** – `supabase-schema.sql`: `workout_sessions` table with id, completed_at, exercise_ids, work_seconds, rest_seconds, rounds. RLS allows anonymous insert/select for simplicity.
 

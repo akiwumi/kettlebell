@@ -178,7 +178,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 |----------|------|---------|
 | **src/data/** | `exercises.js` | 30 exercises (id, name, category, cues, defaultReps/Seconds); categories list |
 | **src/lib/** | `constants.js` | KETTLEBELL_ICON_URL, KETTLEBELL_HEADER_LOGO_URL (horizontal logo for header) |
-| | `supabase.js` | Supabase client (optional; requires env vars) |
+| | `supabaseClient.js` | Supabase client (optional; requires env vars) |
 | | `dailyRotation.js` | Date-based exercise rotation: getDailyExercises, getExercisesByCategory |
 | | `routines.js` | Curated routines + user routines API (getRoutines, saveUserRoutine, deleteUserRoutine, getExercisesByIds) |
 | | `routineDatabase.js` | IndexedDB “KettlebellUserRoutines”, store “routines”; getRoutines, saveRoutine, deleteRoutine; migration from localStorage |
@@ -286,7 +286,7 @@ kettlebell-app/
     │   └── exercises.js
     ├── lib/
     │   ├── constants.js
-    │   ├── supabase.js
+    │   ├── supabaseClient.js
     │   ├── dailyRotation.js
     │   ├── routines.js
     │   ├── routineDatabase.js
@@ -515,7 +515,7 @@ Use these exact IDs as filenames (no extension in the ID):
 
 ### Supabase (optional)
 
-- **Client** – `src/lib/supabase.js` (only when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set).
+- **Client** – `src/lib/supabaseClient.js` (only when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set).
 - **Session service** – `src/services/sessionService.js`: `saveSession()`, `getRecentSessions()`.
 - **Schema** – `supabase-schema-from-guide.sql` (and `supabase/migrations/`): full schema from SUPABASE_SETUP_GUIDE.md (profiles, subscriptions, workout_sessions, workout_history, body_metrics, personal_records, user_routines, schedules, user_goals). RLS on all tables.
 
