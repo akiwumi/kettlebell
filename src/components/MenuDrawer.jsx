@@ -89,10 +89,10 @@ export default function MenuDrawer({ open, onClose }) {
     return location.pathname === to || location.pathname.startsWith(to + '/');
   };
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await signOut();
     onClose();
-    navigate('/', { replace: true });
+    navigate('/');
   };
 
   return (

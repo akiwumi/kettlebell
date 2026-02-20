@@ -4,28 +4,34 @@ import Layout from './Layout';
 import BackLink from './BackLink';
 import PageHeader from './PageHeader';
 import Button from './Button';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 import styles from './ForgotPasswordPage.module.css';
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
+    if (!supabase) {
+      setError('Password reset is not configured');
+      return;
+    }
     setError('');
     setLoading(true);
-    const { error: err } = await resetPassword(email.trim());
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
     setLoading(false);
     if (err) {
-      setError(err.message || 'Failed to send reset email');
+      setError(err.message);
       return;
     }
     setSent(true);
+    alert('Check your email for a reset link.');
   };
 
   if (sent) {
@@ -54,7 +60,7 @@ export default function ForgotPasswordPage() {
           title="Forgot password?"
           subtitle="Enter your email and we'll send you a link to reset your password."
         />
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleResetPassword} className={styles.form}>
           <div className={styles.field}>
             <label htmlFor="fp-email">Email</label>
             <input

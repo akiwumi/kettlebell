@@ -36,7 +36,16 @@ Vite inlines `import.meta.env.VITE_*` into the client bundle at **build time**. 
 3. **Build command:** `npm run build`  
    **Output directory:** `dist`
 4. Add **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (if using Supabase).
-5. Deploy. Vercel will run `npm run build` and serve `dist/`.
+5. **SPA fallback (fixes 404 on reload):** The repo includes `vercel.json` with:
+   ```json
+   {
+     "rewrites": [
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
+   ```
+   You **must redeploy after adding or changing this file**. If you deployed before it existed, Vercel won’t apply it until you push and redeploy.
+6. Deploy. Vercel will run `npm run build` and serve `dist/`.
 
 ### Netlify
 
@@ -44,7 +53,12 @@ Vite inlines `import.meta.env.VITE_*` into the client bundle at **build time**. 
 2. **Build command:** `npm run build`  
    **Publish directory:** `dist`
 3. **Site settings → Build & deploy → Environment**: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` if needed.
-4. Trigger a deploy. Netlify runs the build and serves `dist/`.
+4. **SPA fallback (fixes 404 on reload):** You need `public/_redirects` in the repo containing:
+   ```
+   /*    /index.html   200
+   ```
+   This file is already in the repo and is copied to `dist/` during build. Redeploy after adding or changing it so Netlify picks it up.
+5. Trigger a deploy. Netlify runs the build and serves `dist/`.
 
 ### Cloudflare Pages
 

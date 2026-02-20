@@ -29,20 +29,46 @@ import Community from './components/Community';
 import RoutinePage from './components/RoutinePage';
 import AIAssistant from './components/AIAssistant';
 import AuthCallback from './components/auth/AuthCallback';
+import AuthConfirm from './components/auth/AuthConfirm';
+import AuthReset from './components/auth/AuthReset';
 import PaymentSuccess from './components/payment/PaymentSuccess';
 import PaymentCancel from './components/payment/PaymentCancel';
 import Goals from './components/Goals';
 import RegisterPage from './components/RegisterPage';
 import SignInPage from './components/SignInPage';
+import { useAuth } from './contexts/AuthContext';
+import { hasSupabase } from './lib/supabaseClient';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import WelcomeScreen from './components/WelcomeScreen';
 import AdminLoginPage from './components/AdminLoginPage';
 
+const AUTH_PUBLIC_PATHS = [
+  '/auth/callback',
+  '/auth/confirm',
+  '/auth/reset',
+  '/sign-in',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/welcome',
+  '/admin-login',
+  '/payment/success',
+  '/payment/cancel',
+];
+
 function AppContent() {
   const [landingDismissed, setLandingDismissed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { session, loading } = useAuth();
+
+  // When Supabase is configured and there is no session, show only SignInPage (except on auth/public paths so callbacks work).
+  const showSignInOnly =
+    hasSupabase() &&
+    !loading &&
+    !session &&
+    !AUTH_PUBLIC_PATHS.includes(location.pathname);
 
   // On full page refresh, go to home but keep auth (session is restored by AuthContext).
   useEffect(() => {
@@ -75,6 +101,10 @@ function AppContent() {
     setLandingDismissed(false);
     navigate('/', { replace: true });
   };
+
+  if (showSignInOnly) {
+    return <SignInPage />;
+  }
 
   return (
     <ResetContext.Provider value={{ resetApp }}>
@@ -109,6 +139,8 @@ function AppContent() {
           <Route path="/session" element={<Session />} />
         </Route>
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/confirm" element={<AuthConfirm />} />
+        <Route path="/auth/reset" element={<AuthReset />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="*" element={<Navigate to="/" replace />} />

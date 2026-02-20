@@ -103,7 +103,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 |------|------|
 | `index.html` | Entry HTML; loads `src/main.jsx` |
 | `src/main.jsx` | Mounts React app with `<AuthProvider>`, `<AdminProvider>`, and `<App />` |
-| `src/App.jsx` | React Router; defines all routes; on full page refresh navigates to home (auth preserved); wraps routes in `<AppLayout />`; renders **Landing** overlay; routes for `/auth/callback`, `/payment/success`, `/payment/cancel`, `/goals` |
+| `src/App.jsx` | React Router; defines all routes; on full page refresh navigates to home (auth preserved); wraps routes in `<AppLayout />`; renders **Landing** overlay; routes for `/auth/callback`, `/auth/confirm`, `/payment/success`, `/payment/cancel`, `/goals` |
 | `src/components/AppLayout.jsx` | Shell: **top header** (fixed, horizontal Kettlebell Mastery logo), full-screen background, `<main>` for content, `BottomNav`, `MenuDrawer` |
 | `src/components/Landing.jsx` | First screen: full-screen overlay with logo, tagline, “Tap screen to continue”; dissolves to Home on tap |
 
@@ -113,6 +113,7 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 |------|-----------|-------------|
 | `/` | **Home** | Dashboard: welcome, “Log in” in top card (guests), Pro banner (free users; “Log in” link for guests, “Upgrade now” for logged-in), cards with lock badges (Pro), “Choose routine” button |
 | `/auth/callback` | **AuthCallback** | Handles email verification and password-reset link: type=recovery → /reset-password; else → /welcome (or home) |
+| `/auth/confirm` | **AuthConfirm** | Auth confirmation screen: waits for SIGNED_IN then redirects to home (e.g. for OAuth or email link when using this URL) |
 | `/welcome` | **WelcomeScreen** | After email confirmation: “Welcome to Kettlebell Mastery”, Go Pro or Do it later → home |
 | `/reset-password` | **ResetPasswordPage** | Set new password after following reset link; then redirect to Profile with success message |
 | `/payment/success` | **PaymentSuccess** | Post-Stripe checkout success; confirms Pro access |
