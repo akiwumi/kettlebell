@@ -1,6 +1,13 @@
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
+
+export const ResetContext = createContext(null);
+
+export function useReset() {
+  const ctx = useContext(ResetContext);
+  return ctx;
+}
 import Landing from './components/Landing';
 import Home from './components/Home';
 import Session from './components/Session';
@@ -51,8 +58,13 @@ function AppContent() {
     }
   };
 
+  const resetApp = () => {
+    setLandingDismissed(false);
+    navigate('/', { replace: true });
+  };
+
   return (
-    <>
+    <ResetContext.Provider value={{ resetApp }}>
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
@@ -91,7 +103,7 @@ function AppContent() {
         visible={!landingDismissed}
         onTap={handleLandingDismiss}
       />
-    </>
+    </ResetContext.Provider>
   );
 }
 

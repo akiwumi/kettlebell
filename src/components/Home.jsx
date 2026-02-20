@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Layout from './Layout';
 import Button from './Button';
 import ProBanner from './payment/ProBanner';
+import AddToHomeScreenPopup from './AddToHomeScreenPopup';
 import { useAuth } from '../contexts/AuthContext';
 import { getDisplayName, getPhotoUrl } from '../lib/profileStorage';
 import { getWorkouts } from '../lib/trackingStorage';
@@ -37,6 +38,7 @@ export default function Home() {
 
   return (
     <Layout className={styles.homeCard}>
+      <AddToHomeScreenPopup />
       <div className={styles.home}>
         <header className={styles.hero}>
           <div className={styles.profileRow}>

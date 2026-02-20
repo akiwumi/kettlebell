@@ -34,7 +34,9 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Auth emails, confirmation flow, welcome screen, password reset** – Confirmation and reset emails are sent by Supabase by default; README explains how to use Custom SMTP so they come from “Kettlebell Mastery”. After registration, user sees “Check your email to confirm” (when email confirmation is required). After confirming the email link, user is sent to a **Welcome** screen (“Welcome to Kettlebell Mastery”) with **Go Pro** or **Do it later** (→ home). Login page has **Forgot password?** → ForgotPasswordPage (enter email, send reset link) → user clicks link → AuthCallback (type=recovery) → **ResetPasswordPage** (set new password) → redirect to Profile with “Your password has been reset” banner. AuthContext: updatePassword; new routes /welcome, /reset-password; WelcomeScreen, ResetPasswordPage. |
+| Latest | **Add to Home Screen popup on Home** – When the user opens the home screen, a popup encourages adding the app to the device home screen. On browsers that support it (e.g. Android Chrome), an “Add to Home Screen” button triggers the install prompt automatically; on iOS, short Safari instructions are shown. Dismissal is stored in sessionStorage so the popup doesn’t reappear in the same session. See AddToHomeScreenPopup.jsx, Home.jsx. |
+| — | **Reset app: pull down or tap logo** – User can reset the app (show Landing and go to home) by dragging down on the main content when at the top of the scroll, or by tapping the header logo. ResetContext in App.jsx provides resetApp(); AppLayout uses it for logo button and pull-down gesture (touch and mouse). See App.jsx, AppLayout.jsx. |
+| — | **Auth emails, confirmation flow, welcome screen, password reset** – Confirmation and reset emails are sent by Supabase by default; README explains how to use Custom SMTP so they come from “Kettlebell Mastery”. After registration, user sees “Check your email to confirm” (when email confirmation is required). After confirming the email link, user is sent to a **Welcome** screen (“Welcome to Kettlebell Mastery”) with **Go Pro** or **Do it later** (→ home). Login page has **Forgot password?** → ForgotPasswordPage (enter email, send reset link) → user clicks link → AuthCallback (type=recovery) → **ResetPasswordPage** (set new password) → redirect to Profile with “Your password has been reset” banner. AuthContext: updatePassword; new routes /welcome, /reset-password; WelcomeScreen, ResetPasswordPage. |
 | — | **Profile → login when guest; Home login button; Go Pro on sign-in/register; refresh → home, keep auth** – Tapping Profile in menu/bar: if not logged in, redirects to sign-in (with “Create account” link); if logged in, goes to Profile. Home top card: small “Log in” button for guests. ProBanner: Sign up button removed for guests; “Log in” link instead. Go Pro copy (€3/month, unlock features) moved into SignInPage and RegisterPage. After sign-in/register, redirect uses `returnTo` (e.g. back to Profile). Full page refresh always navigates to home while keeping login (session restored by AuthContext). See ProfileGate, App.jsx, Home.jsx, ProBanner, SignInPage, RegisterPage. |
 | — | **Register = free account only; Pro opt-in from Profile; Add to Home Screen** – After registration users go to Home (no automatic Pro/checkout). Pro upgrade only via Profile: dedicated "Upgrade to Pro" button (Stripe). ProBanner/ProGate: guests see "Sign up" (no checkout redirect); copy clarifies upgrade from Profile. PWA: `public/manifest.json`, theme-color and apple-mobile-web-app meta, `AddToHomeScreen` in Profile with iOS/Android instructions and optional Install button. See RegisterPage, ProBanner, ProGate, Profile, AddToHomeScreen, index.html. |
 | — | **Supabase schema from guide** – Canonical schema in `supabase-schema-from-guide.sql` and `supabase/migrations/20250220000000_kettlebell_gym_full_schema.sql`; idempotent (safe to re-run). Apply via Supabase SQL Editor (paste file) or `supabase db push` after link. SUPABASE_SETUP_GUIDE.md A2 updated. |
@@ -135,12 +137,13 @@ npm run preview  # Serve dist/ locally (e.g. http://localhost:4173)
 
 | Component | Purpose |
 |-----------|---------|
-| **AppLayout** | Wrapper: fixed transparent top header (horizontal logo), background, main content area (fits between header and nav, no page scroll), BottomNav, MenuDrawer |
+| **AppLayout** | Wrapper: fixed top header with **tappable logo** (reset app), background, main content (pull-down at top to reset), BottomNav, MenuDrawer |
 | **BottomNav** | Fixed bottom bar: Home, Profile, Data, Exercises, Menu (hamburger); Profile goes to /profile (login if guest via ProfileGate) |
 | **MenuDrawer** | Slide-up drawer from Menu: links to all sections (Main, Progress, Data, Schedule, Community, Profile, Exercises); Profile → /profile (login if guest) |
 | **ProfileGate** | Wraps /profile route: if logged in renders Profile; if not, redirects to sign-in with returnTo so user returns to Profile after login/register |
 | **Landing** | First screen on open: logo, tagline, “Tap screen to continue”; white full-screen overlay; dissolve to Home on tap |
 | **Layout** | Page wrapper: max-width, glass panel, centred content; `fillViewport` (default true) fits card between header and nav with scroll inside card; Library uses `fillViewport={false}` |
+| **AddToHomeScreenPopup** | Modal on Home: encourages adding app to home screen; "Add to Home Screen" button triggers install prompt when available (e.g. Android Chrome); iOS shows Safari instructions; "Not now" dismisses (sessionStorage) |
 | **PageHeader** | Title + optional subtitle |
 | **BackLink** | “← Back” link |
 
@@ -271,6 +274,7 @@ kettlebell-app/
     │   ├── MenuDrawer.jsx, MenuDrawer.module.css
     │   ├── PageHeader.jsx, PageHeader.module.css
     │   ├── AddToHomeScreen.jsx, AddToHomeScreen.module.css
+    │   ├── AddToHomeScreenPopup.jsx, AddToHomeScreenPopup.module.css
     │   ├── Profile.jsx, Profile.module.css
     │   ├── ProfileGate.jsx
     │   ├── RegisterPage.jsx, RegisterPage.module.css

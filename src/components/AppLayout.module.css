@@ -26,6 +26,26 @@
   background: transparent;
 }
 
+.logoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logoButton:hover {
+  opacity: 0.9;
+}
+
+.logoButton:active {
+  opacity: 0.85;
+}
+
 .topHeaderLogo {
   height: 44px;
   width: auto;
