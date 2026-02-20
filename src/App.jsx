@@ -70,14 +70,6 @@ function AppContent() {
     !session &&
     !AUTH_PUBLIC_PATHS.includes(location.pathname);
 
-  // On full page refresh, go to home but keep auth (session is restored by AuthContext).
-  useEffect(() => {
-    const nav = performance.getEntriesByType?.('navigation')?.[0];
-    if (nav?.type === 'reload' && location.pathname !== '/') {
-      navigate('/', { replace: true });
-    }
-  }, []);
-
   // Lock PWA to portrait when running from home screen (manifest + Screen Orientation API when supported).
   useEffect(() => {
     const isStandalone =
