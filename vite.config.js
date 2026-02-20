@@ -2,15 +2,15 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  base: '/',
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            // Split each major dependency into its own chunk
-            const name = id.split('node_modules/')[1].split('/')[0];
-            return `vendor/${name}`;
-          }
+        manualChunks: {
+          'vendor-router': ['react-router-dom'],
+          'vendor-recharts': ['recharts'],
+          'vendor-supabase': ['@supabase/supabase-js'],
         },
       },
     },
