@@ -34,7 +34,8 @@ Mobile-first web app for kettlebell workouts: dashboard, custom and pre-curated 
 
 | When | What changed |
 |------|--------------|
-| Latest | **Log out in menu** – Hamburger menu shows a "Log out" button at the bottom when the user is signed in; tap to sign out, close the menu, and return to home. See MenuDrawer.jsx. |
+| Latest | **PWA portrait lock** – Home-screen PWA is locked to portrait: manifest `orientation: portrait` and runtime Screen Orientation API when supported (e.g. Android). See public/manifest.json, App.jsx. |
+| — | **Log out in menu** – Hamburger menu shows a "Log out" button at the bottom when the user is signed in; tap to sign out, close the menu, and return to home. See MenuDrawer.jsx. |
 | — | **PWA sign-in: no client timeout** – Sign-in no longer uses a client-side timeout (was causing PWA to time out). Standalone detection broadened (standalone, fullscreen, minimal-ui, navigator.standalone). Sign-in page shows “Open in browser to sign in” when running as PWA. See SignInPage.jsx. |
 | — | **Admin login** – Optional admin access via env `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`. Sign in at `/admin-login` (link on sign-in page) to get full access to all app areas (Pro gates bypassed). Admin state stored in sessionStorage; "End admin session" in Profile. AdminContext, AdminLoginPage, ProGate/Home/ProBanner/Profile/WelcomeScreen respect `isAdmin`. |
 | — | **Pull-down reset on all pages; 404 on reload** – Pull-down-to-reset now uses the scrollable container under the pointer (Layout card or main content), so it works on every page. vercel.json rewrites all routes to index.html; added public/_redirects for Netlify/other hosts. Redeploy after pull to apply 404 fix. |
@@ -417,7 +418,7 @@ kettlebell-app/
 ### Profile
 
 - **Upgrade to Pro** – Logged-in free users see a "Pro subscription" section with an "Upgrade to Pro" button (Stripe checkout). Pro users see "Manage subscription" instead.
-- **Add to Home Screen** – Instructions to add the app icon to the phone home screen (iOS: Share → Add to Home Screen; Android: menu → Add to Home screen), plus optional "Install app" button when the browser supports it. When the app is opened from the home screen (standalone/PWA), sign-in uses an async auth storage adapter with in-memory fallback; if sign-in fails or times out, the sign-in page shows “Open in browser to sign in” so the user can try in Safari/Chrome (session does not carry back to the PWA on iOS).
+- **Add to Home Screen** – PWA from home screen is locked to portrait (manifest + Screen Orientation API when supported). Instructions to add the app icon to the phone home screen (iOS: Share → Add to Home Screen; Android: menu → Add to Home screen), plus optional "Install app" button when the browser supports it. When the app is opened from the home screen (standalone/PWA), sign-in uses an async auth storage adapter with in-memory fallback; if sign-in fails or times out, the sign-in page shows “Open in browser to sign in” so the user can try in Safari/Chrome (session does not carry back to the PWA on iOS).
 - **Basic info** – Name, age, gender, photo, weight, height, target weight, body measurements, fitness level, experience, injuries.
 - **Coach voice** – Off / Female / Male. Default **Female** (coach on). When on, encouraging phrases during Get-ready, Session (Start, countdown 3-2-1, next exercise, complete); beep in last 10s of “Next in”.
 - **Edit photo** – Button to upload a profile picture; image stored as base64 in profile (compressed if needed) so it persists. With a backend, photos can be stored under `public/registration/profile-photos/`.

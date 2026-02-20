@@ -52,6 +52,18 @@ function AppContent() {
     }
   }, []);
 
+  // Lock PWA to portrait when running from home screen (manifest + Screen Orientation API when supported).
+  useEffect(() => {
+    const isStandalone =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        window.navigator.standalone === true);
+    if (!isStandalone || !window.screen?.orientation?.lock) return;
+    window.screen.orientation.lock('portrait').catch(() => {});
+  }, []);
+
   const handleLandingDismiss = () => {
     setLandingDismissed(true);
     if (location.pathname !== '/') {
