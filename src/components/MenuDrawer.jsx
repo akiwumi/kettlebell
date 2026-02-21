@@ -144,10 +144,10 @@ export default function MenuDrawer({ open, onClose }) {
           ))}
         </div>
         {user && (
-          <div className={styles.footer}>
+          <div className={styles.logoutSection}>
             <button
               type="button"
-              className={styles.logoutBtn}
+              className={styles.logoutButton}
               onClick={handleLogout}
             >
               Log out

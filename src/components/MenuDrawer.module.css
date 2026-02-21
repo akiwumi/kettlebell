@@ -21,12 +21,15 @@
   width: 100%;
   max-width: 430px;
   max-height: 75vh;
+  height: 75vh;
   z-index: 170;
   background: var(--bg-card);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
   padding-bottom: env(safe-area-inset-bottom);
   transition: transform 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 .sheetOpen {
@@ -96,8 +99,9 @@
 }
 
 .scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  max-height: calc(75vh - 5rem);
   padding: 0.75rem 1rem 1rem;
 }
 
@@ -157,29 +161,35 @@
   color: var(--accent-orange);
 }
 
-.footer {
-  padding: 0.75rem 1rem 1rem;
-  border-top: 1px solid var(--border);
+.footer,
+.logoutSection {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.25rem;
+  margin-top: auto;
   background: var(--bg-card);
 }
 
-.logoutBtn {
-  display: block;
+.logoutBtn,
+.logoutButton {
   width: 100%;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  text-align: left;
-  border: none;
+  padding: 0.75rem 1rem;
   background: none;
+  border: 1px solid #e53e3e;
+  border-radius: 0.5rem;
+  color: #e53e3e;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s, color 0.2s;
+  text-align: left;
+  display: block;
 }
 
-.logoutBtn:hover {
-  background: var(--bg-card-soft);
-  color: var(--error, #dc2626);
+.logoutBtn:hover,
+.logoutButton:hover {
+  background: rgba(229, 62, 62, 0.08);
+}
+
+.logoutButton:active {
+  background: rgba(229, 62, 62, 0.08);
 }
