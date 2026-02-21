@@ -16,7 +16,7 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,9 +29,9 @@ export default function ResetPasswordPage() {
       setError('Passwords do not match');
       return;
     }
-    setLoading(true);
+    setSubmitting(true);
     const { error: err } = await updatePassword(password);
-    setLoading(false);
+    setSubmitting(false);
     if (err) {
       setError(err.message || 'Failed to update password');
       return;
@@ -92,8 +92,8 @@ export default function ResetPasswordPage() {
             />
           </div>
           {error && <p className={styles.error} role="alert">{error}</p>}
-          <Button type="submit" disabled={loading} className={styles.submit}>
-            {loading ? 'Updating…' : 'Reset password'}
+          <Button type="submit" disabled={submitting} className={styles.submit}>
+            {submitting ? 'Updating…' : 'Reset password'}
           </Button>
         </form>
       </div>
