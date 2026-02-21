@@ -28,7 +28,12 @@ function LockBadge() {
 
 export default function Home() {
   const { user, profile, isPro, signOut } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, adminLogout } = useAdmin();
+
+  const handleLogout = () => {
+    signOut();
+    adminLogout();
+  };
   const name = profile?.full_name?.trim() || getDisplayName();
   const photoUrl = profile?.avatar_url || getPhotoUrl();
   const workouts = getWorkouts();
@@ -61,7 +66,7 @@ export default function Home() {
               <button
                 type="button"
                 className={styles.loginBtn}
-                onClick={() => signOut()}
+                onClick={handleLogout}
                 aria-label="Log out"
               >
                 Log out

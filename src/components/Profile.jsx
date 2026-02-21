@@ -525,7 +525,14 @@ export default function Profile() {
 
         {user && (
           <div className={styles.signOutWrap}>
-            <Button type="button" variant="secondary" onClick={() => signOut()}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                adminLogout();
+                signOut();
+              }}
+            >
               Sign out
             </Button>
           </div>

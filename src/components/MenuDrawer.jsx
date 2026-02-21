@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { KETTLEBELL_ICON_URL } from '../lib/constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 import styles from './MenuDrawer.module.css';
 
 const menuSections = [
@@ -76,6 +77,7 @@ export default function MenuDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { adminLogout } = useAdmin();
 
   const handleNav = (to) => {
     if (location.pathname !== to) {
@@ -90,6 +92,7 @@ export default function MenuDrawer({ open, onClose }) {
   };
 
   const handleLogout = async () => {
+    adminLogout();
     await signOut();
     onClose();
     navigate('/');

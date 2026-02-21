@@ -37,7 +37,10 @@ export function AdminProvider({ children }) {
   }, []);
 
   const adminLogout = useCallback(() => {
-    setIsAdmin(false);
+    setIsAdminState(false);
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (_) {}
   }, []);
 
   const value = {

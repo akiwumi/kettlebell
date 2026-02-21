@@ -123,11 +123,14 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    if (supabase) await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setIsPro(false);
+    try {
+      if (supabase) await supabase.auth.signOut();
+    } finally {
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setIsPro(false);
+    }
   }
 
   async function resetPassword(email) {
