@@ -61,7 +61,7 @@ export default function Home() {
               <button
                 type="button"
                 className={styles.loginBtn}
-                onClick={signOut}
+                onClick={() => signOut()}
                 aria-label="Log out"
               >
                 Log out
